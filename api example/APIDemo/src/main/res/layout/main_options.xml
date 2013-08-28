@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        >
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Show Paired NODES"
+            android:id="@+id/btnPairedNodes"
+            android:layout_weight="1"
+            android:layout_gravity="center"/>
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Stream Motion"
+            android:id="@+id/btnMotion"
+            android:layout_below="@+id/btnOxa"
+            android:layout_weight="1"/>
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Stream Clima"
+            android:id="@+id/btnClima"
+            android:layout_weight="1"/>
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Stream Therma"
+            android:id="@+id/btnTherma"
+            android:layout_weight="1"/>
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Stream OXA"
+            android:id="@+id/btnOxa"
+            android:layout_weight="1"/>
+
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Capture Color"
+        android:id="@+id/btnChroma"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:singleLine="false" />
+
+    <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Capture Color"
+            android:id="@+id/btnChroma"
+            android:layout_weight="1"
+            android:visibility="gone"/>
+
+</LinearLayout>

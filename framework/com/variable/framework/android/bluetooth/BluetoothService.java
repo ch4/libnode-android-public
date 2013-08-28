@@ -30,14 +30,10 @@ import com.variable.framework.node.NodeDevice;
 import com.variable.framework.node.interfaces.CommunicationController;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
 * This class does all the work for setting up and managing Bluetooth
