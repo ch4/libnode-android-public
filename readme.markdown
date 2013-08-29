@@ -1,6 +1,7 @@
 About this Repo
 ===============
 This repo contains the [NODE](http://nodesensors.com) Android library, as well as an open source example application.
+Documentation can be found [here] (https://variabletech.bitbucket.org/framework/android/doc)
 
 About the Demo Application
 ===============
@@ -38,6 +39,7 @@ Revision History
 Initial Import
 Added Classic Bluetooth Capability (LE is not supported)
 Supports NODE Revision 2 Only
+Added [Java Docs] (https://variabletech.bitbucket.org/framework/android/doc)
 
 
 Troubleshooting
@@ -46,6 +48,7 @@ Troubleshooting
 * An application compiles and will push to the device.
 However, the application throws an error with the message "Unable to Instantiate Activity. . ." 
 Fix: You may need to check the version of Java that you are building IDE is using (Needs to be Version 1.7).
+
 
 * Upon importing code into Android Studio, an IllegalStateException is thrown. 
 Most of the time, recompiling will get fix this error.
