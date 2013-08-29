@@ -16,7 +16,7 @@ The NODE Android library is compatible with Bluetooth-enabled Android devices ru
 Build Requirements
 ===================
 * Android 4.3 API level 18 or above
-* JRE / JDK 1.7 or above
+* JRE / JDK 1.7
 
 License
 =============
