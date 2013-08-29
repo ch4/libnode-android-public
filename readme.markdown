@@ -1,17 +1,22 @@
 About this Repo
 ===============
 This repo contains all bluetooth source for connecting between an Android device and a NODE. It additionally contains
-the compiled java framework code. That is used to expose functionality given by NODE. This framework uses two services,
-a service for classical bluetooth connections and a service for low energy connections.
+the compiled java framework code. That is used to expose functionality given by NODE.
+
+About the Library Demo
+=======================
+The library demo application located in this repo, uses the precompiled jar, which can be downloaded in the downloads section. The library demo displays how to stream clima, motion, oxa, and therma. In addition to, capture color from Chroma.
 
 Compatible Devices
 ==================
 This framework is compatible with Android device 2.3+. 
 The device must also have bluetooth 2.1 capabilities.
 
-Android SDK Requirements
+Repository Requirements
 ===================
-This framework must be compiled with Android 4.3 API Level 18 or greater.
+* Code Must be Compiled with Android 4.3 API Level 18 or greater.
+* JRE / JDK 1.7
+
 
 License
 =============
@@ -33,3 +38,11 @@ Revsion Number
 Initial Import
 Added Classical Bluetooth Capability (LE Not Supported)
 Supports NODE Revision 2 Only
+
+
+Troubleshooting
+==================
+
+* An application compiles and will push to the device.However, the application throws an error with message "Unable to Instantiate Activity. . .", you may need to check the version of Java the IDE is using (Needs to be Version 1.7).
+
+* Upon importing code into Android Studio, an IllegalStateException is thrown. Most of the time, recompile the code and this error will go away.
