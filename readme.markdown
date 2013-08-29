@@ -1,26 +1,26 @@
 About this Repo
 ===============
-This repo contains all bluetooth source for connecting between an Android device and a NODE. It additionally contains
-the compiled java framework code. That is used to expose functionality given by NODE.
+This repo contains the [NODE](http://nodesensors.com) Android library, as well as an open source example application.
 
-About the Library Demo
-=======================
-The library demo application located in this repo, uses the precompiled jar, which can be downloaded in the downloads section. The library demo displays how to stream clima, motion, oxa, and therma. In addition to, capture color from Chroma.
+About the Demo Application
+===============
+The library demo application located in this repo uses a compiled JAR, which can be 
+downloaded separately from the 
+[downloads section](https://bitbucket.org/variabletech/libnode-android-public/downloads). 
+The demo application shows how to capture and display Motion, Clima, Oxa, Chroma and Therma data from a NODE device. 
 
 Compatible Devices
 ==================
-This framework is compatible with Android device 2.3+. 
-The device must also have bluetooth 2.1 capabilities.
+The NODE Android library is compatible with Bluetooth-enabled Android devices running Android version 2.3 or higher. 
 
-Repository Requirements
+Build Requirements
 ===================
-* Code Must be Compiled with Android 4.3 API Level 18 or greater.
-* JRE / JDK 1.7
-
+* Android 4.3 API level 18 or above
+* JRE / JDK 1.7 or above
 
 License
 =============
-Copyright (c) 2012, Variable Technologies LLC
+Copyright (c) 2012-2013, Variable Technologies LLC
 All rights reserved. 
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
@@ -43,6 +43,9 @@ Supports NODE Revision 2 Only
 Troubleshooting
 ==================
 
-* An application compiles and will push to the device.However, the application throws an error with message "Unable to Instantiate Activity. . .", you may need to check the version of Java the IDE is using (Needs to be Version 1.7).
+* An application compiles and will push to the device.
+However, the application throws an error with the message "Unable to Instantiate Activity. . ." 
+Fix: You may need to check the version of Java that you are building IDE is using (Needs to be Version 1.7).
 
-* Upon importing code into Android Studio, an IllegalStateException is thrown. Most of the time, recompile the code and this error will go away.
+* Upon importing code into Android Studio, an IllegalStateException is thrown. 
+Most of the time, recompiling will get fix this error.
