@@ -1,6 +1,7 @@
 About this Repo
 ===============
 This repo contains the [NODE](http://nodesensors.com) Android library, as well as an open source example application.
+
 Documentation can be found [here](https://variabletech.bitbucket.org/framework/android/doc)
 
 About the Demo Application
@@ -37,8 +38,11 @@ Revision History
 ==================
 ### Version 0.0.5 
 Initial Import
+
 Added Classic Bluetooth Capability (LE is not supported)
+
 Supports NODE Revision 2 Only
+
 Added [Java Docs](https://variabletech.bitbucket.org/framework/android/doc)
 
 
