@@ -13,7 +13,15 @@ The demo application shows how to capture and display Motion, Clima, Oxa, Chroma
 
 Compatible Devices
 ==================
-The NODE Android library is compatible with Bluetooth-enabled Android devices running Android version 2.3 or higher. 
+The library and bluetooth implementation has been tested on the following devices:
+	* Samsung S3 & S4 
+	* HTC One X (Developer Edition)
+	* HTC One X (Consumer Edition)
+	* Nexus 7 (1st Gen & 2nd Gen)
+	* Droid X (1st Gen) [This API Example Only]
+	* Samsung Galaxy S2
+
+However, the NODE Android library is compatible with Bluetooth-enabled Android devices running Android version 2.3 or higher. 
 
 Build Requirements
 ===================
