@@ -82,7 +82,7 @@ public class ClimaFragment extends Fragment  implements INode.ClimaHumidityListe
     }
 
     @Override
-    public void onClimaLightUpdate(NodeDevice nodeDevice, Float lightLevel) {
+    public void onClimaLightUpdate(NodeDevice nodeDevice, float lightLevel) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_CLIMA_LIGHT);
         m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, lightLevel);
         m.sendToTarget();
