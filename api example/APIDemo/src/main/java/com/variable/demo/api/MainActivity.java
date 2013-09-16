@@ -15,16 +15,17 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
-import com.variable.demo.api.fragment.ChromaScanFragment;
 import com.variable.demo.api.fragment.ClimaFragment;
 import com.variable.demo.api.fragment.MainOptionsFragment;
 import com.variable.demo.api.fragment.MotionFragment;
 import com.variable.demo.api.fragment.OxaFragment;
 import com.variable.demo.api.fragment.ThermaFragment;
+import com.variable.demo.api.fragment.ThermoCoupleFragment;
 import com.variable.framework.android.bluetooth.BluetoothService;
 import com.variable.framework.android.bluetooth.DefaultBluetoothDevice;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.AndroidNodeDevice;
+import com.variable.framework.node.DataLogSetting;
 import com.variable.framework.node.NodeDevice;
 import com.variable.framework.node.adapter.StatusAdapter;
 
@@ -44,8 +45,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         mService = new BluetoothService(mHandler);
         NodeApplication.setServiceAPI(mService);
 
-        Fragment frag = new MainOptionsFragment().setOnClickListener(this);
-        animateToFragment(frag, MainOptionsFragment.TAG);
+
     }
 
 
@@ -54,7 +54,24 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onResume();
 
         ensureBluetoothIsOn();
+
+        //Start Options Fragment
+        Fragment frag = new MainOptionsFragment().setOnClickListener(this);
+        animateToFragment(frag, MainOptionsFragment.TAG);
     }
+
+    @Override
+    public void onPause(){
+        super.onResume();
+
+        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
+        if(node != null){
+            node.disconnect(); //Clean up after ourselves.
+        }
+
+        while(getSupportFragmentManager().popBackStackImmediate()) ;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -74,10 +91,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         node.requestSerial();
         node.requestVersion();
         node.requestQuietModeStatus();
-        node.requestDataLoggingPeriod();
-        node.requestIsDataloggingEnabled();
-        node.requestIsDataLoggingOn();
-        node.requestDataloggingFreeMemorySpace();
+
+        //Requesting Datalog Information.
+        DataLogSetting dlogSettings = node.getDatalogSettings();
+        dlogSettings.requestPeriod();
+        dlogSettings.requestIsDataloggingEnabled();
+        dlogSettings.requestState();
+        dlogSettings.requestFreeMemorySpace();
+
         node.requestModuleVersions();
         node.requestStatus();
         node.requestModuleSubtypes(); //By issuing model version last we will know that all the commands have been recieved and initialized when we recieve the model subtypes.
@@ -181,19 +202,22 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.btnMotion:
                 animateToFragment(new MotionFragment(), MotionFragment.TAG);
                 break;
+
             case R.id.btnClima:
                 animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
                 break;
+
             case R.id.btnTherma:
                 animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
                 break;
+
             case R.id.btnOxa:
                 animateToFragment(new OxaFragment(), OxaFragment.TAG);
                 break;
-            case R.id.btnChroma:
-                animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
-                break;
 
+            case R.id.btnThermoCouple:
+                animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
+                break;
         }
     }
 
@@ -219,6 +243,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     }
                     switch(msg.arg1){
                         case BluetoothService.STATE_CONNECTING:
+
                             if(mProgressDialog == null){
                                 mProgressDialog = new ProgressDialog(MainActivity.this);
                             }else{
@@ -230,6 +255,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                             break;
 
                         case  BluetoothService.STATE_CONNECTED:
+
+
                             if(mProgressDialog == null){
                                 mProgressDialog = new ProgressDialog(MainActivity.this);
                             }else{

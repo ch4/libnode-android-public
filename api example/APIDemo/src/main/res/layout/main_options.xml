@@ -54,16 +54,6 @@
 
 
     <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Capture Color"
-        android:id="@+id/btnChroma"
-        android:layout_weight="1"
-        android:layout_gravity="center"
-        android:singleLine="false" />
-
-    <Button
             style="?android:attr/buttonStyleSmall"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -71,5 +61,14 @@
             android:id="@+id/btnChroma"
             android:layout_weight="1"
             android:visibility="gone"/>
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Stream ThermoCouple"
+        android:id="@+id/btnThermoCouple"
+        android:layout_weight="1"
+        />
 
 </LinearLayout>
