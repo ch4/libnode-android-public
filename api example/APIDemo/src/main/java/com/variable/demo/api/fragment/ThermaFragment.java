@@ -117,7 +117,7 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
                 String rawText = text.getText().toString();
                 try
                 {
-                    Integer emissivity_value = Integer.parseInt(rawText);
+                    Float emissivity_value = Float.parseFloat(rawText);
                     PreferenceManager.getDefaultSharedPreferences(getActivity())
                         .edit()
                         .putFloat(PREF_EMISSIVITY_NUMBER, emissivity_value)
