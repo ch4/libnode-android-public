@@ -1,14 +1,22 @@
 package com.variable.demo.api.fragment;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.variable.demo.api.MessageConstants;
 import com.variable.demo.api.NodeApplication;
@@ -25,10 +33,13 @@ import java.text.DecimalFormat;
 public class ThermaFragment extends Fragment implements INode.ThermaListener {
     public static final String TAG = ThermaFragment.class.getName();
 
+    //The Handler of this class primarily demonstrates how to use a NodeDevice isntance with a physical therma attached.
+
     private TextView temperatureText;
-    private Switch   irLedsSwitch;
+    private ToggleButton irLedsSwitch;
     private int temperatureUnit = 0;
 
+    public static final String PREF_EMISSIVITY_NUMBER = "com.variable.demo.api.setting.EMISSIVITY_NUMBER";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,6 +53,21 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
                if(++temperatureUnit == 2){
                    temperatureUnit = 0;
                }
+            }
+        });
+
+        irLedsSwitch = (ToggleButton) root.findViewById(R.id.irToggle);
+        irLedsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mHandler.obtainMessage(MessageConstants.MESSAGE_CHANGE_IR_THERMA).sendToTarget();
+            }
+        });
+
+        root.findViewById(R.id.btnEmissivityChange).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                buildAndShowEmissivityDialog();
             }
         });
         return root;
@@ -75,6 +101,37 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
         }
     }
 
+    /**
+     * Builds a Dialog to ask the user to change the emissivity setting.
+     */
+    public void buildAndShowEmissivityDialog(){
+        final EditText text = new EditText(getActivity());
+        text.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        text.setHint("Enter a number for the emissivity of the surface.");
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Enter an Emissivity Number");
+        builder.setView(text);
+        builder.setPositiveButton("Change", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                String rawText = text.getText().toString();
+                try
+                {
+                    Integer emissivity_value = Integer.parseInt(rawText);
+                    PreferenceManager.getDefaultSharedPreferences(getActivity())
+                        .edit()
+                        .putFloat(PREF_EMISSIVITY_NUMBER, emissivity_value)
+                        .commit();
+
+                    mHandler.obtainMessage(MessageConstants.MESSAGE_EMISSIVITY_NUMBER_UPDATE).sendToTarget();
+
+                }catch(NumberFormatException e){ }
+            }
+        });
+        builder.setNegativeButton("Cancel", null);
+        builder.create().show();
+    }
+
     @Override
     public void onTemperatureReading(NodeDevice nodeDevice, Float reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_THERMA_TEMPERATURE);
@@ -99,6 +156,22 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
                   temperatureText.setText(formatter.format(value) +  unitSymbol);
                   break;
 
+              case MessageConstants.MESSAGE_CHANGE_IR_THERMA:
+                  //This Block show how to adjust the ir lights on THERMA without changing its streaming state.
+                  boolean irLEDState = irLedsSwitch.isChecked();
+                  NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
+
+                  //Sets the New IR State.
+                  node.setStreamModeIRTherma(node.isThermaStreaming(), irLEDState);
+                  break;
+
+              case MessageConstants.MESSAGE_EMISSIVITY_NUMBER_UPDATE:
+                  Float emiss = PreferenceManager.getDefaultSharedPreferences(getActivity()).getFloat(PREF_EMISSIVITY_NUMBER, 1);
+                  NodeDevice node1 = ((NodeApplication) getActivity().getApplication()).getActiveNode();
+
+                  //Updates the Stream by passing the emissivity to node with a stream lifetime of infinity.
+                  node1.setStreamModeIRTherma(node1.isThermaStreaming(), true, true, emiss, 0, 0);
+                  break;
         }
       }
     };
