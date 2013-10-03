@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import com.variable.demo.api.MessageConstants;
@@ -25,6 +26,8 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
     public static final String TAG = ThermaFragment.class.getName();
 
     private TextView temperatureText;
+    private Switch   irLedsSwitch;
+    private int temperatureUnit = 0;
 
 
     @Override
@@ -33,7 +36,14 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
 
         View root = inflater.inflate(R.layout.therma, null, false);
         temperatureText = (TextView) root.findViewById(R.id.txtTherma);
-
+        temperatureText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+               if(++temperatureUnit == 2){
+                   temperatureUnit = 0;
+               }
+            }
+        });
         return root;
     }
 
@@ -81,7 +91,12 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
           float value = msg.getData().getFloat(MessageConstants.FLOAT_VALUE_KEY);
           switch(msg.what){
               case MessageConstants.MESSAGE_THERMA_TEMPERATURE:
-                  temperatureText.setText("Temperature: " + formatter.format(value) + " C");
+                  String unitSymbol = " ºC";
+                  if(temperatureUnit  == 1){
+                      value =  value * 1.8000f + 32;
+                      unitSymbol = " ºF";
+                  }
+                  temperatureText.setText(formatter.format(value) +  unitSymbol);
                   break;
 
         }
