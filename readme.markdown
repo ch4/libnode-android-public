@@ -2,7 +2,9 @@ About this Repo
 ===============
 This repo contains the [NODE](http://nodesensors.com) Android library, as well as an open source example application.
 
-Documentation can be found [here](https://variabletech.bitbucket.org/framework/android/doc)
+Documentation
+=============
+Documentation can be found [here](http://variabletech.bitbucket.org/framework/android/doc)
 
 About the Demo Application
 ===============
