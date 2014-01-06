@@ -194,12 +194,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         ft.commit();
     }
 
+    private boolean checkForSensor(NodeDevice node, NodeEnums.ModuleType type, boolean displayIfNotFound){
+       BaseSensor sensor = node.findSensor(type);
+        if(sensor == null && displayIfNotFound){
+            Toast.makeText(MainActivity.this, type.toString() + " not found on " + node.getName(), Toast.LENGTH_SHORT).show();
+        }
+
+        return sensor != null;
+    }
+    private boolean isNodeConnected(NodeDevice node) { return node != null && node.isConnected(); }
 
     @Override
     public void onClick(View view) {
-        BaseSensor sensor;
         NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-        if(node == null && !node.isConnected())
+        if(isNodeConnected(node))
         {
             Toast.makeText(this, "No Connection Available", Toast.LENGTH_SHORT ).show();
             return;
@@ -210,59 +218,33 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                 break;
 
             case R.id.btnClima:
-                sensor = node.findSensor(NodeEnums.ModuleType.CLIMA);
-                if(sensor == null)
-                {
-                    Toast.makeText(this, "Clima not attached to NODE. ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
-                break;
+               if(checkForSensor(node, NodeEnums.ModuleType.CLIMA, true))
+                    animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
+               break;
 
             case R.id.btnTherma:
-                sensor = node.findSensor(NodeEnums.ModuleType.THERMA);
-                if(sensor == null){
-                    Toast.makeText(this,"Therma not attached to NODE. ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
+                if(checkForSensor(node, NodeEnums.ModuleType.THERMA, true))
+                    animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
                 break;
 
             case R.id.btnOxa:
-                sensor = node.findSensor(NodeEnums.ModuleType.OXA);
-                if(sensor == null){
-                    Toast.makeText(this, "OXA not attached to NODE. ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new OxaFragment(), OxaFragment.TAG);
+                if(checkForSensor(node, NodeEnums.ModuleType.OXA, true))
+                    animateToFragment(new OxaFragment(), OxaFragment.TAG);
                 break;
 
             case R.id.btnThermoCouple:
-                sensor = node.findSensor(NodeEnums.ModuleType.THERMOCOUPLE);
-                if(sensor == null)
-                {
-                    Toast.makeText(this, "Thermocouple not attached to NODE.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
+                if(checkForSensor(node, NodeEnums.ModuleType.THERMOCOUPLE, true))
+                    animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
                 break;
 
             case R.id.btnBarCode:
-                sensor = node.findSensor(NodeEnums.ModuleType.BARCODE);
-                if(sensor == null){
-                    Toast.makeText(this, "BarCode not attached to NODE. ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new BarCodeFragment(), BarCodeFragment.TAG);
+                if(checkForSensor(node, NodeEnums.ModuleType.BARCODE, true))
+                    animateToFragment(new BarCodeFragment(), BarCodeFragment.TAG);
                 break;
 
             case R.id.btnChroma:
-                sensor = node.findSensor(NodeEnums.ModuleType.CHROMA);
-                if(sensor == null){
-                    Toast.makeText(this, "Chroma not attached to NODE. ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
+                if(checkForSensor(node, NodeEnums.ModuleType.CHROMA, true))
+                    animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
                 break;
 
             //NODE must be polled to maintain an up to date array of sensors.
