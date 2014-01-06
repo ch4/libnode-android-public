@@ -6,12 +6,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.variable.demo.api.ColorUtils;
-import com.variable.framework.chroma.ChromaDevice;
+import com.variable.framework.node.ChromaDevice;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
+
+import com.variable.framework.node.enums.NodeEnums;
 import com.variable.framework.node.reading.VTRGBCReading;
 
 import java.util.Date;
@@ -25,7 +27,7 @@ import java.util.Date;
  * Created by coreymann on 6/28/13.
  */
 
-public class ChromaFragment extends Fragment implements INode.ChromaListener{
+public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListener{
         public static final String TAG = ChromaFragment.class.getName();
 
       /*The what in a new message */
@@ -42,8 +44,7 @@ public class ChromaFragment extends Fragment implements INode.ChromaListener{
         public static final String  EXTRA_VALUE_A          = "com.variable.chroma.EXTRA_A";
         public static final String  EXTRA_VALUE_B          = "com.variable.chroma.EXTRA_B";
 
-
-        private INode.ButtonListener mButtonListener = new INode.ButtonListener() {
+        private NodeDevice.ButtonListener mButtonListener = new NodeDevice.ButtonListener() {
             //TODO: Test Button Pressed and Released Events
             @Override
             public void onPushed(NodeDevice nodeDevice) {
@@ -60,7 +61,11 @@ public class ChromaFragment extends Fragment implements INode.ChromaListener{
                     try {   Thread.sleep(500);  }
                     catch (InterruptedException e) {    e.printStackTrace();    }
 
-                    nodeDevice.requestChromaReading();
+                    //Issue a request for a new reading.
+                    ChromaDevice chroma = nodeDevice.findSensor(NodeEnums.ModuleType.CHROMA);
+                    if(chroma != null){
+                        chroma.requestChromaReading();
+                    }
                 }
             }
         };
@@ -94,11 +99,11 @@ public class ChromaFragment extends Fragment implements INode.ChromaListener{
      *
      *
      *
-     * @param node
+     * @param chromaDevice
      * @param reading
      */
     @Override
-    public void  onChromaReadingRecieved(NodeDevice node,VTRGBCReading reading){
+    public void  onChromaReadingRecieved(ChromaDevice chromaDevice,VTRGBCReading reading){
         Message msg = mHandler.obtainMessage(MESSAGE_NEW_READING);
         String hex = "";
         int color = 0;
@@ -214,16 +219,12 @@ public class ChromaFragment extends Fragment implements INode.ChromaListener{
      * @param temperature
      */
     @Override
-    public void onChromaTemperatureReading(NodeDevice device, Float temperature) {
+    public void onChromaTemperatureReading(ChromaDevice device, Float temperature) {
         mHandler.obtainMessage(MESSAGE_NEW_TEMPERATURE_READING, temperature).sendToTarget();
     }
 
-
     @Override
-    public void onChromaDeviceCreated(NodeDevice nodeDevice, ChromaDevice chromaDevice) {
-
+    public void onWhitePointCalComplete(ChromaDevice device, boolean status) {
+        Toast.makeText(getActivity(), "Chroma has finished calibration. result= " + (status ? "true" : "false"), Toast.LENGTH_SHORT).show();
     }
-
-    @Override
-    public void onWhitePointCalComplete(NodeDevice device, boolean status) {    }
 }

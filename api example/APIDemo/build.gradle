@@ -3,17 +3,22 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
+        classpath 'com.android.tools.build:gradle:0.6.+'
     }
 }
 apply plugin: 'android'
 
 repositories {
     mavenCentral()
+
+    maven{
+        url "https://bitbucket.org/api/1.0/repositories/variabletech/maven-repo/raw/java/"
+        artifactUrls mavenLocal()
+    }
 }
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 18
     buildToolsVersion "17.0.0"
 
     defaultConfig {
@@ -23,6 +28,6 @@ android {
 }
 
 dependencies {
-    compile files('libs/Node.Framework.jar')
     compile 'com.android.support:support-v4:13.0.+'
+    compile group:'node.framework', name:'Android.API', version:'1.1.2'
 }

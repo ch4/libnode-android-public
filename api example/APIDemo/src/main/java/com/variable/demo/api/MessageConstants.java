@@ -25,4 +25,8 @@ public abstract class MessageConstants {
     public static final String Y_VALUE_KEY = "com.variable.api.demo.Y_READING_VALUE_KEY";
     public static final String Z_VALUE_KEY = "com.variable.api.demo.Z_READING_VALUE_KEY";
 
+
+    public static final String TIME_STAMP  = "com.variable.api.demo.TIME_STAMP_KEY";
+    public static final String TIME_SOURCE = "com.variable.api.demo.TIME_SOURCE";
+
 }

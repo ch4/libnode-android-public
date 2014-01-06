@@ -15,6 +15,8 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
+import com.variable.demo.api.fragment.BarCodeFragment;
+import com.variable.demo.api.fragment.ChromaScanFragment;
 import com.variable.demo.api.fragment.ClimaFragment;
 import com.variable.demo.api.fragment.MainOptionsFragment;
 import com.variable.demo.api.fragment.MotionFragment;
@@ -25,11 +27,16 @@ import com.variable.framework.android.bluetooth.BluetoothService;
 import com.variable.framework.android.bluetooth.DefaultBluetoothDevice;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.AndroidNodeDevice;
+import com.variable.framework.node.BaseSensor;
+import com.variable.framework.node.ChromaCalibrationAndBatchingTask;
 import com.variable.framework.node.DataLogSetting;
 import com.variable.framework.node.NodeDevice;
+import com.variable.framework.node.adapter.ConnectionAdapter;
 import com.variable.framework.node.adapter.StatusAdapter;
+import com.variable.framework.node.enums.NodeEnums;
+import com.variable.framework.node.interfaces.ProgressUpdateListener;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener {
+public class MainActivity extends FragmentActivity implements View.OnClickListener{
     private static final String TAG = MainActivity.class.getName();
     private static BluetoothService mService;
 
@@ -41,11 +48,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
 
         //Init Bluetooth Stuff
-        ensureBluetoothIsOn();
-        mService = new BluetoothService(mHandler);
-        NodeApplication.setServiceAPI(mService);
-
-
+        if(ensureBluetoothIsOn()){
+            mService = new BluetoothService(mHandler);
+            NodeApplication.setServiceAPI(mService);
+        }
     }
 
 
@@ -81,67 +87,44 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     public void onConnected(final NodeDevice node)
     {
-
         //Set the NODE as connected and its connection status as connecting.
         node.isConnected(true);
         node.setConnectionStatus(BluetoothService.STATE_CONNECTING);
 
         //Issuing Initialization Commands
-        node.requestKoreConfiguration();
-        node.requestSerial();
         node.requestVersion();
-        node.requestQuietModeStatus();
+        node.initSensors();
 
-        //Requesting Datalog Information.
-        DataLogSetting dlogSettings = node.getDatalogSettings();
-        dlogSettings.requestPeriod();
-        dlogSettings.requestIsDataloggingEnabled();
-        dlogSettings.requestState();
-        dlogSettings.requestFreeMemorySpace();
-
-        node.requestModuleVersions();
-        node.requestStatus();
-        node.requestModuleSubtypes(); //By issuing model version last we will know that all the commands have been recieved and initialized when we recieve the model subtypes.
-
-
-
-        //Listen for the Model Sub Types
-        final StatusAdapter statusListener =  new StatusAdapter() {
+        final ConnectionAdapter connectionAdapter = new ConnectionAdapter(){
             @Override
-            public void onSubModulesUpdate(NodeDevice node){
-                Log.d(TAG, "onSubModuleUpdate() " + node.getSubModuleA() + " [" + node.getSubModuleA() + "] , " + node.getModuleB() + " [" + node.getSubModuleB() + "]");
-                DefaultNotifier.instance().removeStatusListener(this);
-                node.setConnectionStatus(BluetoothService.STATE_CONNECTED);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
-                    }
-                });
+            public void onCommunicationInitCompleted(NodeDevice node) {
+
+                BaseSensor sensor = node.findSensor(NodeEnums.ModuleType.CHROMA);
+                if(sensor != null)
+                {
+                    ChromaCalibrationAndBatchingTask task = new ChromaCalibrationAndBatchingTask(MainActivity.this, sensor, node, new ProgressUpdateListener() {
+                        @Override
+                        public void onProgressUpdated(int i) {
+                            if(i == 100){
+                                mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
+                            }
+                        }
+                    });
+                    new Thread(task).start();
+                    return;
+                }
+
+
+                mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
             }
 
             @Override
-            public void onModulesUpdate(NodeDevice device) {
-                Log.d(TAG, "onModuleUpdate() " + node.getSubModuleA() + "  , " + node.getModuleB());
+            public void nodeDeviceFailedToInit(NodeDevice device) {
+                onCommunicationInitFailed(device);
             }
         };
 
-        //Register for the event.
-        DefaultNotifier.instance().addStatusListener(statusListener);
-
-
-        mHandler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                //Check if this NODE is connected successfully.
-                if(node.getConnectionStatus() != BluetoothService.STATE_CONNECTED){
-                    DefaultNotifier.instance().removeStatusListener(statusListener);
-                    onCommunicationInitFailed(node);
-                }
-            }
-        }, 2500);
-
+        DefaultNotifier.instance().addConnectionListener(connectionAdapter);
     }
 
     /**
@@ -150,27 +133,43 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     public void onCommunicationInitCompleted(NodeDevice node)
     {
-        Toast.makeText(this, node.getName() + " is now ready for use.", Toast.LENGTH_SHORT);
+        Toast.makeText(this, node.getName() + " is now ready for use.", Toast.LENGTH_SHORT).show();
     }
 
     public void onDisconnect(NodeDevice node)
     {
-        Toast.makeText(this, node.getName() + " disconnected.", Toast.LENGTH_SHORT);
+        Toast.makeText(this, node.getName() + " disconnected.", Toast.LENGTH_SHORT).show();
     }
 
     public void onCommunicationInitFailed(NodeDevice node)
     {
-        Toast.makeText(this, node.getName() + " failed initialization.", Toast.LENGTH_SHORT);
+        Toast.makeText(this, node.getName() + " failed initialization.", Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Invokes a new intent to request to start the bluetooth, if not already on.
      */
-    private void ensureBluetoothIsOn(){
+    private boolean ensureBluetoothIsOn(){
         if(!BluetoothAdapter.getDefaultAdapter().isEnabled()){
             Intent btIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             btIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(btIntent);
+            startActivityForResult(btIntent, 200);
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == 200){
+            if(resultCode == RESULT_OK){
+                mService = new BluetoothService(mHandler);
+                NodeApplication.setServiceAPI(mService);
+            }
+
         }
     }
 
@@ -198,25 +197,77 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void onClick(View view) {
+        BaseSensor sensor;
+        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
+        if(node == null && !node.isConnected())
+        {
+            Toast.makeText(this, "No Connection Available", Toast.LENGTH_SHORT ).show();
+            return;
+        }
         switch(view.getId()){
             case R.id.btnMotion:
                 animateToFragment(new MotionFragment(), MotionFragment.TAG);
                 break;
 
             case R.id.btnClima:
+                sensor = node.findSensor(NodeEnums.ModuleType.CLIMA);
+                if(sensor == null)
+                {
+                    Toast.makeText(this, "Clima not attached to NODE. ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
                 break;
 
             case R.id.btnTherma:
+                sensor = node.findSensor(NodeEnums.ModuleType.THERMA);
+                if(sensor == null){
+                    Toast.makeText(this,"Therma not attached to NODE. ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
                 break;
 
             case R.id.btnOxa:
+                sensor = node.findSensor(NodeEnums.ModuleType.OXA);
+                if(sensor == null){
+                    Toast.makeText(this, "OXA not attached to NODE. ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateToFragment(new OxaFragment(), OxaFragment.TAG);
                 break;
 
             case R.id.btnThermoCouple:
+                sensor = node.findSensor(NodeEnums.ModuleType.THERMOCOUPLE);
+                if(sensor == null)
+                {
+                    Toast.makeText(this, "Thermocouple not attached to NODE.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
+                break;
+
+            case R.id.btnBarCode:
+                sensor = node.findSensor(NodeEnums.ModuleType.BARCODE);
+                if(sensor == null){
+                    Toast.makeText(this, "BarCode not attached to NODE. ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                animateToFragment(new BarCodeFragment(), BarCodeFragment.TAG);
+                break;
+
+            case R.id.btnChroma:
+                sensor = node.findSensor(NodeEnums.ModuleType.CHROMA);
+                if(sensor == null){
+                    Toast.makeText(this, "Chroma not attached to NODE. ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
+                break;
+
+            //NODE must be polled to maintain an up to date array of sensors.
+            case R.id.btnRefreshSensors:
+                node.requestSensorUpdate();
                 break;
         }
     }
@@ -228,6 +279,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         @Override
         public void handleMessage(Message msg) {
             NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
+
             switch (msg.what) {
                 case BluetoothService.MESSAGE_DEVICE_ADDRESS:
                     //Retrieve the active
@@ -312,6 +364,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
             if(!mProgressDialog.isShowing()) { mProgressDialog.show(); }
         }
+
+
     };
 
 

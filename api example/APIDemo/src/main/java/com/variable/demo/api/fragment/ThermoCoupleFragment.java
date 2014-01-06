@@ -14,17 +14,20 @@ import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
+import com.variable.framework.node.ThermocoupleSensor;
+import com.variable.framework.node.enums.NodeEnums;
+import com.variable.framework.node.reading.SensorReading;
 
 import java.text.DecimalFormat;
 
 /**
  * Created by coreymann on 9/16/13.
  */
-public class ThermoCoupleFragment extends Fragment implements INode.ThermaCoupleListener {
+public class ThermoCoupleFragment extends Fragment implements ThermocoupleSensor.ThermaCoupleListener {
     public static final String TAG = ThermoCoupleFragment.class.getName();
     private TextView temperatureText;
 
+    private ThermocoupleSensor thermocoupleSensor;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,12 +46,7 @@ public class ThermoCoupleFragment extends Fragment implements INode.ThermaCouple
 
         //Unregister for thermoCouple event.
         DefaultNotifier.instance().removeThermaCoupleListener(this);
-
-        NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-        if(node != null)
-        {
-            node.setStreamModeThermocouple(false, (short) 0 , (short) 0); //Turns streaming and the ir off.
-        }
+        thermocoupleSensor.stopSensor();
     }
 
     @Override
@@ -60,14 +58,15 @@ public class ThermoCoupleFragment extends Fragment implements INode.ThermaCouple
         NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
         if(node != null)
         {
-           node.setStreamModeThermocouple(true, (short) 0, (short) 0);
+            thermocoupleSensor = node.findSensor(NodeEnums.ModuleType.THERMOCOUPLE);
+            thermocoupleSensor.startSensor();
         }
     }
 
     @Override
-    public void onThermoCoupleReading(NodeDevice nodeDevice, Float reading) {
+    public void onThermoCoupleReading(ThermocoupleSensor sensor, SensorReading<Float> reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_THERMA_TEMPERATURE);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, reading);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, reading.getValue());
         m.sendToTarget();
     }
 

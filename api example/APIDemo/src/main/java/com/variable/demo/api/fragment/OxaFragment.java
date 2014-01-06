@@ -14,17 +14,20 @@ import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
+import com.variable.framework.node.OxaSensor;
+import com.variable.framework.node.enums.NodeEnums;
+import com.variable.framework.node.reading.SensorReading;
 
 import java.text.DecimalFormat;
 
 /**
  * Created by coreymann on 8/13/13.
  */
-public class OxaFragment extends Fragment implements INode.OxaListener {
+public class OxaFragment extends Fragment implements OxaSensor.OxaListener {
     public static final String TAG = OxaFragment.class.getName();
 
     private TextView oxaText;
+    private OxaSensor oxa;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,41 +45,36 @@ public class OxaFragment extends Fragment implements INode.OxaListener {
 
         DefaultNotifier.instance().removeOxaListener(this);
 
-        NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-        if(node != null)
-        {
-            node.setStreamModeOxa(false, (short) 0, (short) 0);
-        }
+        //Turn off oxa
+        oxa.stopSensor();
+
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
+        //Register Oxa Listener
         DefaultNotifier.instance().addOxaListener(this);
 
         NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
         if(node != null)
         {
-            node.setStreamModeOxa(true, (short) 0, (short) 0);
+            oxa = node.findSensor(NodeEnums.ModuleType.OXA);
+            oxa.startSensor();
         }
     }
 
     @Override
-    public void onOxaBaselineUpdate(NodeDevice nodeDevice, float v) {
+    public void onOxaBaselineUpdate(OxaSensor sensor, SensorReading<Float> baseline_reading) {
 
     }
 
     @Override
-    public void onOxaUpdate(NodeDevice nodeDevice, Float aFloat) {
+    public void onOxaUpdate(OxaSensor sensor, SensorReading<Float> reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_OXA_READING);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, aFloat);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, reading.getValue());
         m.sendToTarget();
-    }
-
-    @Override
-    public void onOxaTempUpdate(NodeDevice nodeDevice, int i) {
-
     }
 
     private final Handler mHandler = new Handler(){
@@ -88,7 +86,7 @@ public class OxaFragment extends Fragment implements INode.OxaListener {
         float value = message.getData().getFloat(MessageConstants.FLOAT_VALUE_KEY);
         switch(message.what){
             case MessageConstants.MESSAGE_OXA_READING:
-                oxaText.setText(formatter.format(value) + " PPM");
+                oxaText.setText(formatter.format(value) + " RAW");
                 break;
         }
       }

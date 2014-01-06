@@ -14,14 +14,17 @@ import com.variable.demo.api.MessageConstants;
 import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
 import com.variable.framework.dispatcher.DefaultNotifier;
+import com.variable.framework.node.MotionSensor;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
-import com.variable.framework.node.reading.VTSensorReading;
+import com.variable.framework.node.reading.MotionReading;
 
 /**
  * Created by coreymann on 8/13/13.
  */
-public class MotionFragment extends Fragment  implements INode.AccelerometerListener, INode.MagnetometerListener, INode.GyroscopeListener {
+public class MotionFragment extends Fragment  implements
+                                                    MotionSensor.AccelerometerListener,
+                                                    MotionSensor.MagnetometerListener,
+                                                    MotionSensor.GyroscopeListener {
     public static  final String TAG = MotionFragment.class.getName();
     private static final int DECIMAL_PRECISION = 1;
 
@@ -36,6 +39,8 @@ public class MotionFragment extends Fragment  implements INode.AccelerometerList
     private SeekBar magX;
     private SeekBar magY;
     private SeekBar magZ;
+
+    private MotionSensor motion;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,7 +94,8 @@ public class MotionFragment extends Fragment  implements INode.AccelerometerList
         NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
         if(node != null)
         {
-            node.setStreamModeAcc(true, true, true);
+            motion = node.getMotionSensor();
+            motion.startSensor();
         }
     }
 
@@ -99,11 +105,8 @@ public class MotionFragment extends Fragment  implements INode.AccelerometerList
         super.onPause();
 
         //Stop the Motion Stream
-        NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-        if(node != null)
-        {
-            node.setStreamModeAcc(false, false, false);
-        }
+        motion.stopSensor();
+
 
         //Unregister for Events
         DefaultNotifier.instance().removeAccelerometerListener(this);
@@ -147,35 +150,47 @@ public class MotionFragment extends Fragment  implements INode.AccelerometerList
     };
 
     @Override
-    public void onAccelerometerUpdate(NodeDevice nodeDevice, VTSensorReading reading) {
+    public void onAccelerometerUpdate(MotionSensor sensor, MotionReading reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_ACCELEROMETER_READING);
         Bundle b = m.getData();
         b.putFloat(MessageConstants.X_VALUE_KEY, (reading.getX() + 16) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Y_VALUE_KEY, (reading.getY() + 16) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Z_VALUE_KEY, (reading.getZ() + 16) * DECIMAL_PRECISION);
 
+        //For this demo we are streaming all time stamp from the node device.
+        b.putLong(MessageConstants.TIME_STAMP, reading.getTimeStamp().getTime());
+        b.putInt(MessageConstants.TIME_SOURCE, reading.getTimeStampSource());
+
         m.sendToTarget();
     }
 
 
     @Override
-    public void onMagnetometerUpdate(NodeDevice nodeDevice, VTSensorReading reading) {
+    public void onMagnetometerUpdate(MotionSensor sensor, MotionReading reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_MAGNETOMETER_READING);
         Bundle b = m.getData();
         b.putFloat(MessageConstants.X_VALUE_KEY, (reading.getX() + 6) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Y_VALUE_KEY, (reading.getY() + 6) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Z_VALUE_KEY, (reading.getZ() + 6) * DECIMAL_PRECISION);
 
+        //For this demo we are streaming all time stamp from the node device.
+        b.putLong(MessageConstants.TIME_STAMP, reading.getTimeStamp().getTime());
+        b.putInt(MessageConstants.TIME_SOURCE, reading.getTimeStampSource());
+
         m.sendToTarget();
     }
 
     @Override
-    public void onGyroscopeUpdate(NodeDevice nodeDevice, VTSensorReading reading) {
+    public void onGyroscopeUpdate(MotionSensor sensor, MotionReading reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_GYROSCOPE_READING);
         Bundle b = m.getData();
         b.putFloat(MessageConstants.X_VALUE_KEY, (reading.getX() + 2000) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Y_VALUE_KEY, (reading.getY() + 2000) * DECIMAL_PRECISION);
         b.putFloat(MessageConstants.Z_VALUE_KEY, (reading.getZ() + 2000) * DECIMAL_PRECISION);
+
+        //For this demo we are streaming all time stamp from the node device.
+        b.putLong(MessageConstants.TIME_STAMP, reading.getTimeStamp().getTime());
+        b.putInt(MessageConstants.TIME_SOURCE, reading.getTimeStampSource());
 
         m.sendToTarget();
     }

@@ -8,24 +8,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
-import com.variable.framework.chroma.ChromaDevice;
+import com.variable.framework.node.ChromaDevice;
 import com.variable.framework.node.NodeDevice;
+import com.variable.framework.node.enums.NodeEnums;
 
 import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
- * Created by Corey_2 on 8/28/13.
+ * Created by Corey Mann on 8/28/13.
  */
 public class ChromaScanFragment extends ChromaFragment {
 
 
     public static final String TAG = ChromaScanFragment.class.getName();
     private final DecimalFormat formatter = new DecimalFormat("###.##");
-    private NodeDevice node;
+    private ChromaDevice chroma;
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -36,39 +38,15 @@ public class ChromaScanFragment extends ChromaFragment {
         rootView.findViewById(R.id.btnSingleScan).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-              ;
-                node.requestChromaReading();
+               chroma.requestChromaReading();
             }
         });
 
-        node  = ((NodeApplication)getActivity().getApplication()).getActiveNode();
+        NodeDevice node  = ((NodeApplication)getActivity().getApplication()).getActiveNode();
+        chroma = node.findSensor(NodeEnums.ModuleType.CHROMA);
         return rootView;
     }
 
-    @Override
-    public void onChromaDeviceCreated(NodeDevice nodeDevice, ChromaDevice chromaDevice) {
-        mProgressDialog.dismiss();
-
-        if(chromaDevice != null){
-            Log.wtf(TAG, "Chroma Unable to Initialize...Possible Due to no chroma on NODE");
-        }
-    }
-
-
-
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        if(node.getChromaDevice() == null){
-            mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setMessage("Initializing Chroma");
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-
-            node.requestChromaInstanceAsync(getActivity());
-        }
-    }
     @Override
     public void onColorUpdate(int color){
         super.onColorUpdate(color);
@@ -105,10 +83,4 @@ public class ChromaScanFragment extends ChromaFragment {
         super.onHexValue(hex);
         ((TextView) getView().findViewById(R.id.txtHex)).setText(hex);
     }
-
-
-
-
-
-
 }

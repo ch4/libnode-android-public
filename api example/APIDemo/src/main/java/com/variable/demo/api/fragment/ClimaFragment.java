@@ -13,21 +13,28 @@ import com.variable.demo.api.MessageConstants;
 import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
 import com.variable.framework.dispatcher.DefaultNotifier;
+import com.variable.framework.node.ClimaSensor;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
+import com.variable.framework.node.enums.NodeEnums;
+import com.variable.framework.node.reading.SensorReading;
 
 import java.text.DecimalFormat;
 
 /**
  * Created by coreymann on 8/13/13.
  */
-public class ClimaFragment extends Fragment  implements INode.ClimaHumidityListener, INode.ClimaLightListener, INode.ClimaPressureListener, INode.ClimaTemperatureListener{
+public class ClimaFragment extends Fragment  implements
+                                                        ClimaSensor.ClimaHumidityListener,
+                                                        ClimaSensor.ClimaLightListener,
+                                                        ClimaSensor.ClimaPressureListener,
+                                                        ClimaSensor.ClimaTemperatureListener{
     public static final String TAG = ClimaFragment.class.getName();
 
     private TextView climaLightText;
     private TextView climaPressureText;
     private TextView climaTempText;
     private TextView climaHumidText;
+    private ClimaSensor clima;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,7 +61,12 @@ public class ClimaFragment extends Fragment  implements INode.ClimaHumidityListe
 
         NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
         if(node != null){
-            node.setStreamModeClimaTP(true, true, true); //Turns on all sensor for Clima
+
+            //Located the first available clima sensor.
+            clima = node.findSensor(NodeEnums.ModuleType.CLIMA);
+
+            //Turn on all streaming
+            clima.setStreamMode(true, true, true);
         }
     }
 
@@ -62,43 +74,41 @@ public class ClimaFragment extends Fragment  implements INode.ClimaHumidityListe
     public void onPause() {
         super.onPause();
 
+        //Unregister for clima events.
         DefaultNotifier.instance().removeClimaHumidityListener(this);
         DefaultNotifier.instance().removeClimaLightListener(this);
         DefaultNotifier.instance().removeClimaTemperatureListener(this);
         DefaultNotifier.instance().removeClimaPressureListener(this);
 
-
-        NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-        if(node != null){
-            node.setStreamModeClimaTP(false, false, false); //Turns off all sensor for Clima
-        }
+        //Turn off clima sensor
+        clima.setStreamMode(false, false, false);
     }
 
     @Override
-    public void onClimaHumidityUpdate(NodeDevice nodeDevice, float humidityLevel) {
+    public void onClimaHumidityUpdate(ClimaSensor clima, SensorReading<Float> humidityLevel) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_CLIMA_HUMIDITY);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, humidityLevel);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, humidityLevel.getValue());
         m.sendToTarget();
     }
 
     @Override
-    public void onClimaLightUpdate(NodeDevice nodeDevice, float lightLevel) {
+    public void onClimaLightUpdate(ClimaSensor clima, SensorReading<Float> lightLevel) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_CLIMA_LIGHT);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, lightLevel);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, lightLevel.getValue());
         m.sendToTarget();
     }
 
     @Override
-    public void onClimaPressureUpdate(NodeDevice nodeDevice, Integer kPa) {
+    public void onClimaPressureUpdate(ClimaSensor clima, SensorReading<Integer> kPa) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_CLIMA_PRESSURE);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, kPa);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, kPa.getValue());
         m.sendToTarget();
     }
 
     @Override
-    public void onClimaTemperatureUpdate(NodeDevice nodeDevice, float temperature) {
+    public void onClimaTemperatureUpdate(ClimaSensor clima, SensorReading<Float> temperature) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_CLIMA_TEMPERATURE);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, temperature);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, temperature.getValue());
         m.sendToTarget();
     }
 
@@ -118,7 +128,7 @@ public class ClimaFragment extends Fragment  implements INode.ClimaHumidityListe
                     break;
 
                 case MessageConstants.MESSAGE_CLIMA_PRESSURE:
-                    climaPressureText.setText(formatter.format(value) + " kPA");
+                    climaPressureText.setText(formatter.format(value / 1000) + " kPA");
                     break;
 
                 case MessageConstants.MESSAGE_CLIMA_TEMPERATURE:

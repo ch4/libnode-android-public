@@ -23,14 +23,16 @@ import com.variable.demo.api.NodeApplication;
 import com.variable.demo.api.R;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.interfaces.INode;
+import com.variable.framework.node.ThermaSensor;
+import com.variable.framework.node.enums.NodeEnums;
+import com.variable.framework.node.reading.SensorReading;
 
 import java.text.DecimalFormat;
 
 /**
  * Created by coreymann on 8/13/13.
  */
-public class ThermaFragment extends Fragment implements INode.ThermaListener {
+public class ThermaFragment extends Fragment implements ThermaSensor.ThermaListener {
     public static final String TAG = ThermaFragment.class.getName();
 
     //The Handler of this class primarily demonstrates how to use a NodeDevice isntance with a physical therma attached.
@@ -39,6 +41,7 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
     private ToggleButton irLedsSwitch;
     private int temperatureUnit = 0;
 
+    private ThermaSensor therma;
     public static final String PREF_EMISSIVITY_NUMBER = "com.variable.demo.api.setting.EMISSIVITY_NUMBER";
 
     @Override
@@ -80,11 +83,7 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
         //Unregister for therma event.
         DefaultNotifier.instance().removeThermaListener(this);
 
-        NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-        if(node != null)
-        {
-            node.setStreamModeIRTherma(false); //Turns streaming and the ir off.
-        }
+        therma.stopSensor();
     }
 
     @Override
@@ -97,7 +96,8 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
         NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
         if(node != null)
         {
-            node.setStreamModeIRTherma(true); //Turns streaming and the ir off.
+            therma = node.findSensor(NodeEnums.ModuleType.THERMA);
+            therma.startSensor();
         }
     }
 
@@ -133,9 +133,9 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
     }
 
     @Override
-    public void onTemperatureReading(NodeDevice nodeDevice, Float reading) {
+    public void onTemperatureReading(ThermaSensor sensor, SensorReading<Float> reading) {
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_THERMA_TEMPERATURE);
-        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, reading);
+        m.getData().putFloat(MessageConstants.FLOAT_VALUE_KEY, reading.getValue());
         m.sendToTarget();
 
     }
@@ -158,19 +158,15 @@ public class ThermaFragment extends Fragment implements INode.ThermaListener {
 
               case MessageConstants.MESSAGE_CHANGE_IR_THERMA:
                   //This Block show how to adjust the ir lights on THERMA without changing its streaming state.
-                  boolean irLEDState = irLedsSwitch.isChecked();
-                  NodeDevice node = ((NodeApplication) getActivity().getApplication()).getActiveNode();
-
                   //Sets the New IR State.
-                  node.setStreamModeIRTherma(node.isThermaStreaming(), irLEDState);
+                  therma.setStreamMode(therma.isStreaming(), !therma.isLEDOn());
                   break;
 
               case MessageConstants.MESSAGE_EMISSIVITY_NUMBER_UPDATE:
                   Float emiss = PreferenceManager.getDefaultSharedPreferences(getActivity()).getFloat(PREF_EMISSIVITY_NUMBER, 1);
-                  NodeDevice node1 = ((NodeApplication) getActivity().getApplication()).getActiveNode();
 
                   //Updates the Stream by passing the emissivity to node with a stream lifetime of infinity.
-                  node1.setStreamModeIRTherma(node1.isThermaStreaming(), true, true, emiss, 0, 0);
+                  therma.setStreamMode(therma.isStreaming(),true, emiss, 0,0, true);
                   break;
         }
       }
