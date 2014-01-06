@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
@@ -29,10 +28,8 @@ import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.AndroidNodeDevice;
 import com.variable.framework.node.BaseSensor;
 import com.variable.framework.node.ChromaCalibrationAndBatchingTask;
-import com.variable.framework.node.DataLogSetting;
 import com.variable.framework.node.NodeDevice;
 import com.variable.framework.node.adapter.ConnectionAdapter;
-import com.variable.framework.node.adapter.StatusAdapter;
 import com.variable.framework.node.enums.NodeEnums;
 import com.variable.framework.node.interfaces.ProgressUpdateListener;
 
@@ -54,7 +51,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
-
     @Override
     public void onResume(){
         super.onResume();
@@ -68,29 +64,20 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void onPause(){
-        super.onResume();
+        super.onPause();
 
         NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-        if(node != null){
+        if(isNodeConnected(node)){
             node.disconnect(); //Clean up after ourselves.
         }
 
-        while(getSupportFragmentManager().popBackStackImmediate()) ;
+
+       // while(getSupportFragmentManager().popBackStackImmediate()) ;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
 
     public void onConnected(final NodeDevice node)
     {
-        //Set the NODE as connected and its connection status as connecting.
-        node.isConnected(true);
-        node.setConnectionStatus(BluetoothService.STATE_CONNECTING);
-
         //Issuing Initialization Commands
         node.requestVersion();
         node.initSensors();
@@ -194,6 +181,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         ft.commit();
     }
 
+    /**
+     * Checks for a specific sensor on a node.
+     * @param node - the node
+     * @param type - the module type to check for on the node parameter.
+     * @param displayIfNotFound - allows toasting a message if module is not found on node.
+     * @return true, if the node contains the module
+     */
     private boolean checkForSensor(NodeDevice node, NodeEnums.ModuleType type, boolean displayIfNotFound){
        BaseSensor sensor = node.findSensor(type);
         if(sensor == null && displayIfNotFound){
@@ -202,12 +196,18 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
         return sensor != null;
     }
+
+    /**
+     * Determines if the node is connected. Null is permitted.
+     * @param node
+     * @return
+     */
     private boolean isNodeConnected(NodeDevice node) { return node != null && node.isConnected(); }
 
     @Override
     public void onClick(View view) {
         NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-        if(isNodeConnected(node))
+        if(!isNodeConnected(node))
         {
             Toast.makeText(this, "No Connection Available", Toast.LENGTH_SHORT ).show();
             return;

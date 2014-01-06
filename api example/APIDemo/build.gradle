@@ -13,7 +13,7 @@ repositories {
 
     maven{
         url "https://bitbucket.org/api/1.0/repositories/variabletech/maven-repo/raw/java/"
-        artifactUrls mavenLocal()
+       // artifactUrls mavenLocal()
     }
 }
 
