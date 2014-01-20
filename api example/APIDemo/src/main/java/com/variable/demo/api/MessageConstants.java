@@ -18,6 +18,7 @@ public abstract class MessageConstants {
     public static final int MESSAGE_CHANGE_IR_THERMA   = 8;
     public static final int MESSAGE_EMISSIVITY_NUMBER_UPDATE = 10;
     public static final int MESSAGE_OXA_READING = 9;
+    public static final int MESSAGE_OXA_BASELINE_A = 10;
 
     public static final String FLOAT_VALUE_KEY = "com.variable.api.demo.FLOAT_READING_KEY";
 

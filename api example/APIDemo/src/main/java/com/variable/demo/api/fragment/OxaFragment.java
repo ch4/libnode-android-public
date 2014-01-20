@@ -27,6 +27,7 @@ public class OxaFragment extends Fragment implements OxaSensor.OxaListener {
     public static final String TAG = OxaFragment.class.getName();
 
     private TextView oxaText;
+    private TextView oxaBaseLineA;
     private OxaSensor oxa;
 
     @Override
@@ -35,6 +36,7 @@ public class OxaFragment extends Fragment implements OxaSensor.OxaListener {
 
         View root = inflater.inflate(R.layout.oxa, null, false);
         oxaText = (TextView) root.findViewById(R.id.txtOxa);
+        oxaBaseLineA = (TextView) root.findViewById(R.id.txtBaseLineA);
 
         return root;
     }
@@ -66,8 +68,8 @@ public class OxaFragment extends Fragment implements OxaSensor.OxaListener {
     }
 
     @Override
-    public void onOxaBaselineUpdate(OxaSensor sensor, SensorReading<Float> baseline_reading) {
-
+    public void onOxaBaselineUpdate(OxaSensor sensor, final SensorReading<Float> baseline_reading) {
+       mHandler.obtainMessage(MessageConstants.MESSAGE_OXA_BASELINE_A,baseline_reading.getValue()).sendToTarget();
     }
 
     @Override
@@ -87,6 +89,9 @@ public class OxaFragment extends Fragment implements OxaSensor.OxaListener {
         switch(message.what){
             case MessageConstants.MESSAGE_OXA_READING:
                 oxaText.setText(formatter.format(value) + " RAW");
+                break;
+            case MessageConstants.MESSAGE_OXA_BASELINE_A:
+                oxaBaseLineA.setText(message.obj.toString());
                 break;
         }
       }
