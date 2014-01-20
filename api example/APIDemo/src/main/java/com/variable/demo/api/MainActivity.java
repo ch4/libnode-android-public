@@ -173,7 +173,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         Fragment existingFrag = getSupportFragmentManager().findFragmentByTag(tag);
         if(existingFrag != null){
-            getSupportFragmentManager().beginTransaction().remove(existingFrag).commit();
+            getSupportFragmentManager().beginTransaction().remove(existingFrag).commitAllowingStateLoss();
         }
 
         ft.replace(R.id.center_fragment_container, frag, tag);
