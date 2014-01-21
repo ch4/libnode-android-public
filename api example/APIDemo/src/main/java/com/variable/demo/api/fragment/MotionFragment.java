@@ -18,6 +18,10 @@ import com.variable.framework.node.MotionSensor;
 import com.variable.framework.node.NodeDevice;
 import com.variable.framework.node.reading.MotionReading;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  * Created by coreymann on 8/13/13.
  */
@@ -151,6 +155,11 @@ public class MotionFragment extends Fragment  implements
 
     @Override
     public void onAccelerometerUpdate(MotionSensor sensor, MotionReading reading) {
+        DateFormat formatter = new SimpleDateFormat("MM-dd-yyyy hh:mm.ss");
+
+       // Log.d(TAG, "TimeStamp Source: " + reading.getTimeStampSource());
+       // Log.d(TAG," Time:" + formatter.format(reading.getTimeStamp()));
+
         Message m = mHandler.obtainMessage(MessageConstants.MESSAGE_ACCELEROMETER_READING);
         Bundle b = m.getData();
         b.putFloat(MessageConstants.X_VALUE_KEY, (reading.getX() + 16) * DECIMAL_PRECISION);
