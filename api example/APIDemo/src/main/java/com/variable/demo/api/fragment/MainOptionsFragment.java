@@ -60,18 +60,23 @@ public class MainOptionsFragment  extends Fragment {
     {
         Log.d("", "Selected Device Name" + device.getName());
         BluetoothService mService = NodeApplication.getService();
+        NodeDevice node = NodeApplication.getActiveNode();
+
         if(mService != null){
             //One way to connect to a device
             //mService.connect(device.getAddress());
 
             //Second way, using the NodeDevice implementation
-            NodeDevice node = AndroidNodeDevice.getOrCreateNodeFromBluetoothDevice(device, new DefaultBluetoothDevice(mService));
+            NodeDevice selectedNODE = AndroidNodeDevice.getOrCreateNodeFromBluetoothDevice(device, new DefaultBluetoothDevice(mService));
+
+            //Ensure One Connection At a Time...
+            if(node != null && !selectedNODE.equals(node) && node.isConnected()){   node.disconnect(); }
 
             //Store the Active NODE in the application space for other fragments to use
-            ((NodeApplication) getActivity().getApplication()).setActiveNode(node);
+            NodeApplication.setActiveNode(selectedNODE);
 
             //initiate connection
-            node.connect();
+            selectedNODE.connect();
         }
     }
 
