@@ -15,7 +15,7 @@ public class NodeApplication extends Application {
 
     private static BluetoothService mBluetoothService;
     public  final ArrayList<BluetoothDevice> mDiscoveredDevices = new ArrayList<BluetoothDevice>();
-    public NodeDevice mActiveNode;
+    public static NodeDevice mActiveNode;
 
     public static final BluetoothService getService(){
         return mBluetoothService;
@@ -26,7 +26,7 @@ public class NodeApplication extends Application {
         return mBluetoothService;
     }
 
-    public void setActiveNode(NodeDevice node){ mActiveNode = node; }
+    public static void setActiveNode(NodeDevice node){ mActiveNode = node; }
 
-    public NodeDevice getActiveNode(){  return mActiveNode; }
+    public static NodeDevice getActiveNode(){  return mActiveNode; }
 }
