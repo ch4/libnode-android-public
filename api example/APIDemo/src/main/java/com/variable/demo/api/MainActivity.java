@@ -36,7 +36,7 @@ import com.variable.framework.node.interfaces.ProgressUpdateListener;
 public class MainActivity extends FragmentActivity implements View.OnClickListener{
     private static final String TAG = MainActivity.class.getName();
     private static BluetoothService mService;
-
+    private ConnectionAdapter mConnectionAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,40 +49,9 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mService = new BluetoothService(mHandler);
             NodeApplication.setServiceAPI(mService);
         }
-    }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        ensureBluetoothIsOn();
-
-        //Start Options Fragment
-        Fragment frag = new MainOptionsFragment().setOnClickListener(this);
-        animateToFragment(frag, MainOptionsFragment.TAG);
-    }
-
-    @Override
-    public void onPause(){
-        super.onPause();
-
-        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-        if(isNodeConnected(node)){
-            node.disconnect(); //Clean up after ourselves.
-        }
-
-
-       // while(getSupportFragmentManager().popBackStackImmediate()) ;
-    }
-
-
-    public void onConnected(final NodeDevice node)
-    {
-        //Issuing Initialization Commands
-        node.requestVersion();
-        node.initSensors();
-
-        final ConnectionAdapter connectionAdapter = new ConnectionAdapter(){
+        //Register for Communication Completed Events.
+        mConnectionAdapter = new ConnectionAdapter(){
             @Override
             public void onCommunicationInitCompleted(NodeDevice node) {
 
@@ -111,7 +80,39 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         };
 
-        DefaultNotifier.instance().addConnectionListener(connectionAdapter);
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        ensureBluetoothIsOn();
+
+        //Start Options Fragment
+        Fragment frag = new MainOptionsFragment().setOnClickListener(this);
+        animateToFragment(frag, MainOptionsFragment.TAG);
+
+        //Issuing Initialization Commands
+        DefaultNotifier.instance().addConnectionListener(mConnectionAdapter);
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
+        if(isNodeConnected(node)){
+            node.disconnect(); //Clean up after ourselves.
+        }
+
+        //Issuing Initialization Commands
+        DefaultNotifier.instance().removeConnectionListener(mConnectionAdapter);
+    }
+
+
+    public void onConnected(final NodeDevice node)
+    {
+
     }
 
     /**
