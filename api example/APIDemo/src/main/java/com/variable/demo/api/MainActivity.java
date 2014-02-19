@@ -345,7 +345,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             mProgressDialog.setTitle("Bluetooth Connection");
             mProgressDialog.setMessage(message);
 
-            if(!mProgressDialog.isShowing()) { mProgressDialog.show(); }
+            if(!mProgressDialog.isShowing() && !isFinishing()) { mProgressDialog.show(); }
         }
 
 
