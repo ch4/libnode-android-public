@@ -30,4 +30,5 @@ public abstract class MessageConstants {
     public static final String TIME_STAMP  = "com.variable.api.demo.TIME_STAMP_KEY";
     public static final String TIME_SOURCE = "com.variable.api.demo.TIME_SOURCE";
 
+    public static final int MESSAGE_INIT_NODE_PROGRESS = 11;
 }
