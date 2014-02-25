@@ -28,7 +28,6 @@ public class ChromaScanFragment extends ChromaFragment {
     public static final String TAG = ChromaScanFragment.class.getName();
     private final DecimalFormat formatter = new DecimalFormat("###.##");
     private ChromaDevice chroma;
-    private ProgressDialog mProgressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup view, Bundle savedInstanced){
@@ -71,7 +70,7 @@ public class ChromaScanFragment extends ChromaFragment {
 
 
     @Override
-    public void onLABUpdate(float l, float a, float b){
+    public void onLABUpdate(double l, double a, double b){
         super.onLABUpdate(l, a, b);
         String text = formatter.format(l) + " , " + formatter.format(a) + " , " + formatter.format(b);
         ((TextView) getView().findViewById(R.id.txtLab)).setText(text);

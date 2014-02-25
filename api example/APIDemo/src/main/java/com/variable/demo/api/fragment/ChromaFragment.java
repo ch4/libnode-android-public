@@ -14,7 +14,7 @@ import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
 
 import com.variable.framework.node.enums.NodeEnums;
-import com.variable.framework.node.reading.VTRGBCReading;
+import com.variable.framework.chroma.reading.VTRGBCReading;
 
 import java.util.Date;
 
@@ -109,9 +109,9 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
         int color = 0;
                 color = ColorUtils.RGBToColor(reading.getD65srgbR(), reading.getD65srgbG(), reading.getD65srgbB());
 
-                msg.getData().putFloat(EXTRA_VALUE_A, reading.getD65a());
-                msg.getData().putFloat(EXTRA_VALUE_L, reading.getD65L());
-                msg.getData().putFloat(EXTRA_VALUE_B, reading.getD65b());
+                msg.getData().putDouble(EXTRA_VALUE_A, reading.getD65a());
+                msg.getData().putDouble(EXTRA_VALUE_L, reading.getD65L());
+                msg.getData().putDouble(EXTRA_VALUE_B, reading.getD65b());
 //D65 Values
 //                color = ColorUtils.RGBToColor(reading.getD50srgbR(), reading.getD50srgbG(), reading.getD50srgbB());
 //
@@ -154,7 +154,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
      * @param a
      * @param b
      */
-    public void onLABUpdate(float l, float a, float b){ }
+    public void onLABUpdate(double l, double a, double b){ }
 
     /**
      * Invoked when a new reading has bee recieved. Additionally, this method is invoked on the UI Thread.
@@ -190,7 +190,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
                     Bundle data = msg.getData();
 
                     onRGBUpdate(data.getFloat(EXTRA_COLOR_RED),data.getFloat(EXTRA_COLOR_GREEN), data.getFloat(EXTRA_COLOR_BLUE));
-                    onLABUpdate(data.getFloat(EXTRA_VALUE_L) ,data.getFloat(EXTRA_VALUE_A), data.getFloat(EXTRA_VALUE_B));
+                    onLABUpdate(data.getDouble(EXTRA_VALUE_L) ,data.getDouble(EXTRA_VALUE_A), data.getDouble(EXTRA_VALUE_B));
                     onColorUpdate(data.getInt(EXTRA_SCAN_COLOR));
                     onHexValue(data.getString(EXTRA_HEX_STRING));
 
