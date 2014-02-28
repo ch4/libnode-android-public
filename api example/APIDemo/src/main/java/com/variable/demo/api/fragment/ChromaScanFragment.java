@@ -1,6 +1,8 @@
 package com.variable.demo.api.fragment;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -43,6 +45,15 @@ public class ChromaScanFragment extends ChromaFragment {
 
         NodeDevice node  = ((NodeApplication)getActivity().getApplication()).getActiveNode();
         chroma = node.findSensor(NodeEnums.ModuleType.CHROMA);
+
+        if(chroma.getCalibrationList().size() == 52 && chroma.getModel() == 2.0f){
+            new AlertDialog.Builder(getActivity())
+                    .setTitle("Chroma Invalid")
+                    .setMessage("Your chroma needs to be returned to Variable inc for recall. Please contact us. Chroma is not ensured to work properly until the recall has been satisfied.")
+                    .setPositiveButton("OK", null)
+                    .show();
+        }
+        
         return rootView;
     }
 
