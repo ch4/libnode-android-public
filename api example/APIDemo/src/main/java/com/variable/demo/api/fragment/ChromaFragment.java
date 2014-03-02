@@ -9,12 +9,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.variable.demo.api.ColorUtils;
+import com.variable.framework.node.reading.ColorSense;
 import com.variable.framework.node.ChromaDevice;
 import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.NodeDevice;
 
 import com.variable.framework.node.enums.NodeEnums;
-import com.variable.framework.chroma.reading.VTRGBCReading;
+import com.variable.framework.node.reading.VTRGBCReading;
 
 import java.util.Date;
 
@@ -71,6 +72,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
         };
 
 
+
     @Override
     public void onResume(){
         super.onResume();
@@ -104,6 +106,9 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
      */
     @Override
     public void  onChromaReadingRecieved(ChromaDevice chromaDevice,VTRGBCReading reading){
+        ColorSense sense = reading.getColorSense();
+        Log.d(TAG, "SENSE_VALUES: " + sense.getSenseRed().floatValue() + " , " + sense.getSenseGreen() + " , " + sense.getSenseBlue() + " , " + sense.getSenseClear());
+
         Message msg = mHandler.obtainMessage(MESSAGE_NEW_READING);
         String hex = "";
         int color = 0;

@@ -28,6 +28,7 @@ import com.variable.framework.dispatcher.DefaultNotifier;
 import com.variable.framework.node.AndroidNodeDevice;
 import com.variable.framework.node.BaseSensor;
 import com.variable.framework.node.ChromaCalibrationAndBatchingTask;
+import com.variable.framework.node.ChromaDevice;
 import com.variable.framework.node.NodeDevice;
 import com.variable.framework.node.adapter.ConnectionAdapter;
 import com.variable.framework.node.enums.NodeEnums;
@@ -339,10 +340,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void onSensorConnected(NodeDevice nodeDevice, final BaseSensor baseSensor) {
+        Log.d(TAG, "Sensor Found: " + baseSensor.getModuleType() + " SubType: " + baseSensor.getSubtype() + " Serial: " + baseSensor.getSerialNumber());
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been detected" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been detected", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -352,7 +355,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             ChromaCalibrationAndBatchingTask task = new ChromaCalibrationAndBatchingTask(MainActivity.this, baseSensor, nodeDevice, new ProgressUpdateListener() {
                 @Override
                 public void onProgressUpdated(int i) {
-                    if(i >= 100){
+                    if(i >= 101){
                         mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
                     }else{
                         mHandler.obtainMessage(MessageConstants.MESSAGE_INIT_NODE_PROGRESS,i,-1 ).sendToTarget();
@@ -362,8 +365,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             new Thread(task).start();
             return;
         }
-
-
     }
 
     @Override
