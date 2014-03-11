@@ -45,6 +45,8 @@ public class MainOptionsFragment  extends Fragment {
         root.findViewById(R.id.btnBarCode).setOnClickListener(clickHandler);
         root.findViewById(R.id.btnRefreshSensors).setOnClickListener(clickHandler);
         root.findViewById(R.id.btnChroma).setOnClickListener(clickHandler);
+        root.findViewById(R.id.btnIOSensor).setOnClickListener(clickHandler);
+        root.findViewById(R.id.btnPulseLed).setOnClickListener(clickHandler);
 
         return root;
     }

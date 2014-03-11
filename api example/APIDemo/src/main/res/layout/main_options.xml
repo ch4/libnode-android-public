@@ -116,4 +116,23 @@
         android:layout_above="@+id/btnOxa"
         android:layout_alignBottom="@+id/btnMotion" />
 
+    <Button
+    style="?android:attr/buttonStyleSmall"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Pulse LEDS "
+    android:id="@+id/btnPulseLed"
+    android:layout_below="@+id/btnChroma"
+    android:layout_alignLeft="@+id/btnOxa"
+    android:layout_alignRight="@+id/btnPairedNodes"  />
+    <Button
+        android:visibility="gone"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="IO Sensor "
+        android:id="@+id/btnIOSensor"
+        android:layout_below="@+id/btnChroma"
+        android:layout_alignLeft="@+id/btnOxa"
+        android:layout_alignRight="@+id/btnPairedNodes"  />
 </RelativeLayout>

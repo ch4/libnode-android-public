@@ -12,11 +12,13 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.variable.demo.api.fragment.BarCodeFragment;
 import com.variable.demo.api.fragment.ChromaScanFragment;
 import com.variable.demo.api.fragment.ClimaFragment;
+import com.variable.demo.api.fragment.IOSensorFragment;
 import com.variable.demo.api.fragment.MainOptionsFragment;
 import com.variable.demo.api.fragment.MotionFragment;
 import com.variable.demo.api.fragment.OxaFragment;
@@ -39,13 +41,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     private static BluetoothService mService;
     private ConnectionAdapter mConnectionAdapter;
 
+    private boolean isPulsing = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        //Init Bluetooth Stuff
+        //Init B    luetooth Stuff
         if(ensureBluetoothIsOn()){
             mService = new BluetoothService(mHandler);
             NodeApplication.setServiceAPI(mService);
@@ -98,7 +101,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     public void onConnected(final NodeDevice node)
     {
-
     }
 
 
@@ -241,6 +243,23 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             case R.id.btnRefreshSensors:
                 node.requestSensorUpdate();
                 break;
+
+            case R.id.btnIOSensor:
+                if(checkForSensor(node, NodeEnums.ModuleType.IO, true)){
+                    animateToFragment(new IOSensorFragment(), IOSensorFragment.TAG);
+                }
+                break;
+
+            case R.id.btnPulseLed:
+                if(isPulsing){
+                    ((Button) view).setText("Pulse LEDs" );
+                    node.ledRestoreDefaultBehavior();
+                }else{
+                    ((Button) view).setText("Restore LEDs");
+                    node.ledsPulse((byte) 0xFF, (byte) 0x0F, (byte) 0xFF, (byte) 0xF0, (short) 2000, (short) 25);
+                }
+
+                isPulsing = !isPulsing;
         }
     }
 
