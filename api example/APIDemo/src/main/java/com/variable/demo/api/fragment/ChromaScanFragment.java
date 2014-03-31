@@ -64,13 +64,6 @@ public class ChromaScanFragment extends ChromaFragment {
         getView().findViewById(R.id.imgScanColor).setBackgroundColor(color);
     }
 
-
-    @Override
-    public void onTimeStampUpdate(Date timeStamp){
-        super.onTimeStampUpdate(timeStamp);
-        ((TextView) getView().findViewById(R.id.scanTitle)).setText(timeStamp.toString());
-    }
-
     @Override
     public void onRGBUpdate(float r, float g, float b){
         super.onRGBUpdate(r, g, b);
