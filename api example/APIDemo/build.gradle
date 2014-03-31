@@ -12,11 +12,7 @@ repositories {
     mavenCentral()
 
     maven{
-        url = 'https://repository-variabletech.forge.cloudbees.com/private/'
-        credentials {
-            username cloudbeesUser
-            password cloudbeesPass
-        }
+        url = 'https://repository-variabletech.forge.cloudbees.com/release/'
     }
 }
 configurations.all {
