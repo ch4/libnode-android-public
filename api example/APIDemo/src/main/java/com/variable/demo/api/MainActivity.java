@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.variable.demo.api.fragment.BarCodeFragment;
 import com.variable.demo.api.fragment.ChromaScanFragment;
 import com.variable.demo.api.fragment.ClimaFragment;
-import com.variable.demo.api.fragment.IOSensorFragment;
 import com.variable.demo.api.fragment.MainOptionsFragment;
 import com.variable.demo.api.fragment.MotionFragment;
 import com.variable.demo.api.fragment.OxaFragment;
@@ -242,12 +241,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             //NODE must be polled to maintain an up to date array of sensors.
             case R.id.btnRefreshSensors:
                 node.requestSensorUpdate();
-                break;
-
-            case R.id.btnIOSensor:
-                if(checkForSensor(node, NodeEnums.ModuleType.IO, true)){
-                    animateToFragment(new IOSensorFragment(), IOSensorFragment.TAG);
-                }
                 break;
 
             case R.id.btnPulseLed:
