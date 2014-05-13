@@ -105,7 +105,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
      * @param reading
      */
     @Override
-    public void  onChromaReadingRecieved(ChromaDevice chromaDevice,VTRGBCReading reading){
+    public void  onChromaReadingReceived(ChromaDevice chromaDevice,VTRGBCReading reading){
         ColorSense sense = reading.getColorSense();
         Log.d(TAG, "SENSE_VALUES: " + sense.getSenseRed().floatValue() + " , " + sense.getSenseGreen() + " , " + sense.getSenseBlue() + " , " + sense.getSenseClear());
 

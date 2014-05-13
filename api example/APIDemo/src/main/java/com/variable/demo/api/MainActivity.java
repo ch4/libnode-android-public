@@ -269,7 +269,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
                     if(mProgressDialog == null)
                         mProgressDialog = new ProgressDialog(MainActivity.this);
 
-                    buildDialog(node,mProgressDialog," Initializing Chroma");
+                    buildDialog(node,mProgressDialog,msg.obj.toString());
                     break;
 
                 case BluetoothService.MESSAGE_DEVICE_ADDRESS:
@@ -319,9 +319,14 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
                 //Handle Node Successfull initialized.
                 case DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE:
+                    boolean isSuccessful = (Boolean) msg.obj;
                     Log.d(TAG, "NodeDevice Init Completed in Handler");
                     closeDialog(mProgressDialog);
-                    onCommunicationInitCompleted(node);
+                    if(isSuccessful) {
+                        onCommunicationInitCompleted(node);
+                    }else{
+                        Toast.makeText(MainActivity.this, "Chroma Initialization Failed....Check your Internet Connection", Toast.LENGTH_SHORT).show();
+                    }
                     break;
             }
         }
@@ -366,12 +371,13 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         {
             ChromaCalibrationAndBatchingTask task = new ChromaCalibrationAndBatchingTask(MainActivity.this, baseSensor, nodeDevice, new ProgressUpdateListener() {
                 @Override
-                public void onProgressUpdated(int i) {
-                    if(i >= 101){
-                        mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
-                    }else{
-                        mHandler.obtainMessage(MessageConstants.MESSAGE_INIT_NODE_PROGRESS,i,-1 ).sendToTarget();
-                    }
+                public void onProgressUpdated(String updateText) {
+                    mHandler.obtainMessage(MessageConstants.MESSAGE_INIT_NODE_PROGRESS, updateText ).sendToTarget();
+                }
+
+                @Override
+                public void onTaskFinished(boolean result) {
+                    mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE, result).sendToTarget();
                 }
             });
             new Thread(task).start();
