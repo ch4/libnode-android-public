@@ -319,6 +319,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
                 //Handle Node Successfull initialized.
                 case DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE:
+                    Log.d(TAG, "NodeDevice Init Completed in Handler");
+                    closeDialog(mProgressDialog);
+                    onCommunicationInitCompleted(node);
+                    break;
+
+                case CHROMA_DEVICE_INIT_COMPLETED_WITH_RESULT:
                     boolean isSuccessful = (Boolean) msg.obj;
                     Log.d(TAG, "NodeDevice Init Completed in Handler");
                     closeDialog(mProgressDialog);
@@ -377,7 +383,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
                 @Override
                 public void onTaskFinished(boolean result) {
-                    mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE, result).sendToTarget();
+                    mHandler.obtainMessage(CHROMA_DEVICE_INIT_COMPLETED_WITH_RESULT, result).sendToTarget();
                 }
             });
             new Thread(task).start();
@@ -394,4 +400,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             }
         });
     }
+
+    private static final int CHROMA_DEVICE_INIT_COMPLETED_WITH_RESULT = 100;
 }

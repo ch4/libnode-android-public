@@ -34,6 +34,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
       /*The what in a new message */
         public static final int MESSAGE_NEW_READING = 0;
         public static final int MESSAGE_NEW_TEMPERATURE_READING = 1;
+        public static final int MESSAGE_CALIBRATION_RESPONSE = 2;
 
         public static final String  EXTRA_TIMESTAMP        = "com.variable.chroma.EXTRA_TIMESTAMP";
         public static final String  EXTRA_SCAN_COLOR       = "com.variable.chroma.EXTRA_SCAN_COLOR";
@@ -44,6 +45,8 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
         public static final String  EXTRA_VALUE_L          = "com.variable.chroma.EXTRA_L";
         public static final String  EXTRA_VALUE_A          = "com.variable.chroma.EXTRA_A";
         public static final String  EXTRA_VALUE_B          = "com.variable.chroma.EXTRA_B";
+
+        public static final String  EXTRA_CAL_STATUS       = "com.variable.chroma.EXTRA_CAL_STATUS";
 
         private NodeDevice.ButtonListener mButtonListener = new NodeDevice.ButtonListener() {
             //TODO: Test Button Pressed and Released Events
@@ -189,10 +192,11 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
     private final Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg){
+            Bundle data;
             switch(msg.what){
 
                 case MESSAGE_NEW_READING:
-                    Bundle data = msg.getData();
+                     data = msg.getData();
 
                     onRGBUpdate(data.getFloat(EXTRA_COLOR_RED),data.getFloat(EXTRA_COLOR_GREEN), data.getFloat(EXTRA_COLOR_BLUE));
                     onLABUpdate(data.getDouble(EXTRA_VALUE_L) ,data.getDouble(EXTRA_VALUE_A), data.getDouble(EXTRA_VALUE_B));
@@ -206,6 +210,12 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
                 case MESSAGE_NEW_TEMPERATURE_READING:
                     float temperature = Float.valueOf(msg.obj.toString());
                     onTemperatureUpdate(temperature);
+                    break;
+
+                case MESSAGE_CALIBRATION_RESPONSE:
+                     data = msg.getData();
+                    onCalibrationUpdate(data.getBoolean(EXTRA_CAL_STATUS));
+                    break;
             }
         }
     };
@@ -230,6 +240,18 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
 
     @Override
     public void onWhitePointCalComplete(ChromaDevice device, boolean status) {
-        Toast.makeText(getActivity(), "Chroma has finished calibration. result= " + (status ? "true" : "false"), Toast.LENGTH_SHORT).show();
+        Message msg = mHandler.obtainMessage(MESSAGE_CALIBRATION_RESPONSE);
+        msg.getData().putBoolean(EXTRA_CAL_STATUS,status);
+        msg.sendToTarget();
     }
+
+    /**
+     * Invoked when a whitepoint calibration has been completed. Additionally, this method is invoked on the UI Thread.
+     *
+     * @param status - calibration successful?
+     */
+    public void onCalibrationUpdate(boolean status){  }
+
+
+
 }
