@@ -63,7 +63,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         Fragment frag = new MainOptionsFragment().setOnClickListener(this);
         animateToFragment(frag, MainOptionsFragment.TAG);
 
-        //Issuing Initialization Commands
+        //Registering for Events.
         DefaultNotifier.instance().addConnectionListener(this);
         DefaultNotifier.instance().addSensorDetectorListener(this);
     }
@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             node.disconnect(); //Clean up after ourselves.
         }
 
-        //Issuing Initialization Commands
+        //Registering for Events
         DefaultNotifier.instance().removeConnectionListener(this);
         DefaultNotifier.instance().removeSensorDetectorListener(this);
     }
@@ -156,6 +156,12 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
 
+    @Override
+    public void onBackPressed(){
+        //Perform noop if MainOptionsFragment is shown.
+        if(getSupportFragmentManager().findFragmentByTag(MainOptionsFragment.TAG) != null){    return;  }
+        else { super.onBackPressed();  }
+    }
     /**
      * Checks if a fragment with the specified tag exists already in the Fragment Manager. If present, then removes fragment.
      *
@@ -294,6 +300,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
+    //region Sensor Detector Callbacks
 
     @Override
     public void onSensorConnected(NodeDevice nodeDevice, final BaseSensor baseSensor) {
@@ -315,6 +322,10 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been removed", Toast.LENGTH_SHORT).show();
     }
 
+    //endregion
+
+
+    //region Chroma Initialization Callbacks
     @Override
     public void onProgressUpdated(String status) {
         updateProgressDialog(null, status);
@@ -331,4 +342,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
             Toast.makeText(this, "Chroma failed to find suitable internet connection", Toast.LENGTH_SHORT).show();
         }
     }
+
+    //endregion
 }
