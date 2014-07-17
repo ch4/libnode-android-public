@@ -4,7 +4,7 @@ Framework Release Notes and Changes
 *v1.6*
 -------
 
-* StatusListener, ChromaListener, ButtonListener, SensorDetector, and ConnectionListener are now invoked on the UI Thread.
+* StatusListener, ChromaListener, ButtonListener, SensorDetector, DataloggingListener, and ConnectionListener are now invoked on the UI Thread.
 
 * DeltaE CMC 2:1 and CMC 1:1 are now fully supported in VTRGBCReading class.
 
@@ -18,7 +18,7 @@ Framework Release Notes and Changes
 
 * Added a ConnectionFail event to ConnectionListener and supported in BluetoothService.
 
-* Added a ConenctionFail message to be sent through the handler.
+* Added a ConnectionFail message to be sent through the handler.
 
 * Bug Fixes for Chroma Readings.
 
