@@ -98,10 +98,4 @@ public class ChromaScanFragment extends ChromaFragment {
         super.onHexValue(hex);
         ((TextView) getView().findViewById(R.id.txtHex)).setText(hex);
     }
-
-    @Override
-    public void onCalibrationUpdate(boolean status) {
-        super.onCalibrationUpdate(status);
-        Toast.makeText(getActivity(), "Calibration " + (status ? "succeeded" : "failed"), Toast.LENGTH_LONG).show();
-    }
 }

@@ -31,22 +31,6 @@ import java.util.Date;
 public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListener{
         public static final String TAG = ChromaFragment.class.getName();
 
-      /*The what in a new message */
-        public static final int MESSAGE_NEW_READING = 0;
-        public static final int MESSAGE_NEW_TEMPERATURE_READING = 1;
-        public static final int MESSAGE_CALIBRATION_RESPONSE = 2;
-
-        public static final String  EXTRA_TIMESTAMP        = "com.variable.chroma.EXTRA_TIMESTAMP";
-        public static final String  EXTRA_SCAN_COLOR       = "com.variable.chroma.EXTRA_SCAN_COLOR";
-        public static final String EXTRA_COLOR_RED         = "com.variable.chroma.EXTRA_COLOR_RED";
-        public static final String EXTRA_COLOR_GREEN       = "com.variable.chroma.EXTRA_COLOR_GREEN";
-        public static final String EXTRA_COLOR_BLUE        = "com.variable.chroma.EXTRA_COLOR_BLUE";
-        public static final String EXTRA_HEX_STRING        = "com.variable.chroma.EXTRA_HEX";
-        public static final String  EXTRA_VALUE_L          = "com.variable.chroma.EXTRA_L";
-        public static final String  EXTRA_VALUE_A          = "com.variable.chroma.EXTRA_A";
-        public static final String  EXTRA_VALUE_B          = "com.variable.chroma.EXTRA_B";
-
-        public static final String  EXTRA_CAL_STATUS       = "com.variable.chroma.EXTRA_CAL_STATUS";
 
         private NodeDevice.ButtonListener mButtonListener = new NodeDevice.ButtonListener() {
             //TODO: Test Button Pressed and Released Events
@@ -74,8 +58,6 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
             }
         };
 
-
-
     @Override
     public void onResume(){
         super.onResume();
@@ -95,7 +77,7 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
     }
 
     /**
-     * Builds a new message. This in turn will invoked
+     * invokes
      *
      *    onRGBUpdate
      *    onTimeStampUpdate
@@ -108,37 +90,17 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
      * @param reading
      */
     @Override
-    public void  onChromaReadingReceived(ChromaDevice chromaDevice,VTRGBCReading reading){
+    public void  onChromaReadingReceived(ChromaDevice chromaDevice,VTRGBCReading reading) {
         ColorSense sense = reading.getColorSense();
         Log.d(TAG, "SENSE_VALUES: " + sense.getSenseRed().floatValue() + " , " + sense.getSenseGreen() + " , " + sense.getSenseBlue() + " , " + sense.getSenseClear());
+        int color = ColorUtils.RGBToColor(reading.getD65srgbR(), reading.getD65srgbG(), reading.getD65srgbB());
 
-        Message msg = mHandler.obtainMessage(MESSAGE_NEW_READING);
-        String hex = "";
-        int color = 0;
-                color = ColorUtils.RGBToColor(reading.getD65srgbR(), reading.getD65srgbG(), reading.getD65srgbB());
+        //D50 onLABUpdate(reading.getD50L(), reading.getD50a(), reading.getD50b());
+        onLABUpdate(reading.getD65L(), reading.getD65a(), reading.getD65b());
+        onHexValue("#" + Integer.toHexString(color).substring(2).toUpperCase());
+        onRGBUpdate(Color.red(color), Color.green(color), Color.blue(color));
+        onColorUpdate(color);
 
-                msg.getData().putDouble(EXTRA_VALUE_A, reading.getD65a());
-                msg.getData().putDouble(EXTRA_VALUE_L, reading.getD65L());
-                msg.getData().putDouble(EXTRA_VALUE_B, reading.getD65b());
-//D65 Values
-//                color = ColorUtils.RGBToColor(reading.getD50srgbR(), reading.getD50srgbG(), reading.getD50srgbB());
-//
-//                msg.getData().putFloat(EXTRA_VALUE_A, reading.getD50a());
-//                msg.getData().putFloat(EXTRA_VALUE_L, reading.getD50L());
-//                msg.getData().putFloat(EXTRA_VALUE_B, reading.getD50b());
-
-        hex = Integer.toHexString(color);
-        hex = "#" + hex.substring(2);
-
-        msg.getData().putString(EXTRA_HEX_STRING, hex.toUpperCase());
-
-        msg.getData().putFloat(EXTRA_COLOR_RED, Color.red(color));
-        msg.getData().putFloat(EXTRA_COLOR_GREEN, Color.green(color));
-        msg.getData().putFloat(EXTRA_COLOR_BLUE, Color.blue(color));
-
-        msg.getData().putLong(EXTRA_TIMESTAMP, reading.getTimeStamp().getTime());
-        msg.getData().putInt(EXTRA_SCAN_COLOR, color);
-        msg.sendToTarget();
     }
 
     /**
@@ -170,55 +132,6 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
      */
     public void onColorUpdate(int color ) {  }
 
-    /**
-     * Invoked when a new reading has been recieved. Additionally, this method is invoked on the UI Thread.
-     * @param timeStamp
-     */
-    public void onTimeStampUpdate(Date timeStamp){ }
-
-
-    /**
-     * Invoked when a new temperature reading has been recieved. Additionally, this method is invoked on the UI Thread.
-     * @param temp
-     */
-    public void onTemperatureUpdate(float temp){    }
-
-    /**
-     * Gets the handler used in this instance of ChromaFragment.
-     * @return
-     */
-    protected Handler getHandler(){ return mHandler; }
-
-    private final Handler mHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg){
-            Bundle data;
-            switch(msg.what){
-
-                case MESSAGE_NEW_READING:
-                     data = msg.getData();
-
-                    onRGBUpdate(data.getFloat(EXTRA_COLOR_RED),data.getFloat(EXTRA_COLOR_GREEN), data.getFloat(EXTRA_COLOR_BLUE));
-                    onLABUpdate(data.getDouble(EXTRA_VALUE_L) ,data.getDouble(EXTRA_VALUE_A), data.getDouble(EXTRA_VALUE_B));
-                    onColorUpdate(data.getInt(EXTRA_SCAN_COLOR));
-                    onHexValue(data.getString(EXTRA_HEX_STRING));
-
-                    Date timeStamp = new Date(data.getLong(EXTRA_TIMESTAMP));
-                    onTimeStampUpdate(timeStamp);
-                    break;
-
-                case MESSAGE_NEW_TEMPERATURE_READING:
-                    float temperature = Float.valueOf(msg.obj.toString());
-                    onTemperatureUpdate(temperature);
-                    break;
-
-                case MESSAGE_CALIBRATION_RESPONSE:
-                     data = msg.getData();
-                    onCalibrationUpdate(data.getBoolean(EXTRA_CAL_STATUS));
-                    break;
-            }
-        }
-    };
 
 
     public boolean allowScanWhenButtonReleased(){
@@ -226,32 +139,16 @@ public class ChromaFragment extends Fragment implements ChromaDevice.ChromaListe
     }
 
     /**
-     * Passes a new message, that will invoke onTemperatureUpdate(float) on the UI Thread.
      *
-     * NOTE: This method is not on the UI Thread.
      *
      * @param device
      * @param temperature
      */
     @Override
     public void onChromaTemperatureReading(ChromaDevice device, Float temperature) {
-        mHandler.obtainMessage(MESSAGE_NEW_TEMPERATURE_READING, temperature).sendToTarget();
     }
 
     @Override
     public void onWhitePointCalComplete(ChromaDevice device, boolean status) {
-        Message msg = mHandler.obtainMessage(MESSAGE_CALIBRATION_RESPONSE);
-        msg.getData().putBoolean(EXTRA_CAL_STATUS,status);
-        msg.sendToTarget();
-    }
-
-    /**
-     * Invoked when a whitepoint calibration has been completed. Additionally, this method is invoked on the UI Thread.
-     *
-     * @param status - calibration successful?
-     */
-    public void onCalibrationUpdate(boolean status){  }
-
-
-
+        Toast.makeText(getActivity(), "Calibration " + (status ? "succeeded" : "failed"), Toast.LENGTH_LONG).show();}
 }
