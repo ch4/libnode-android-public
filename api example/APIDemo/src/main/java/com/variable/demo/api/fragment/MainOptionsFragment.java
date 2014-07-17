@@ -1,6 +1,7 @@
 package com.variable.demo.api.fragment;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -26,6 +27,7 @@ import java.util.Set;
  */
 public class MainOptionsFragment  extends Fragment {
     public static final String TAG = MainOptionsFragment.class.getName();
+    private static Dialog mDevicesDialog;
 
     private View.OnClickListener onClickListener;
 
@@ -54,11 +56,31 @@ public class MainOptionsFragment  extends Fragment {
 
     public MainOptionsFragment setOnClickListener(View.OnClickListener listener) { onClickListener = listener; return this; }
 
+
+
+
+    public class ButtonClickHandler implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            switch(view.getId()){
+                case R.id.btnPairedNodes:
+                    showPairedNodesDialog(view.getContext());
+                    break;
+                default:
+                    if(onClickListener != null){
+                        onClickListener.onClick(view);
+                    }
+                    break;
+            }
+        }
+    }
+
+
     /**
      * Initiates a connection with the selected device.
      * @param device
      */
-    private void onDeviceSelected(BluetoothDevice device)
+    private static void onDeviceSelected(BluetoothDevice device)
     {
         Log.d("", "Selected Device Name" + device.getName());
         BluetoothService mService = NodeApplication.getService();
@@ -82,39 +104,25 @@ public class MainOptionsFragment  extends Fragment {
         }
     }
 
-
-    public class ButtonClickHandler implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            switch(view.getId()){
-                case R.id.btnPairedNodes:
-                    showPairedNodesDialog(view.getContext());
-                    break;
-                default:
-                    if(onClickListener != null){
-                        onClickListener.onClick(view);
-                    }
-                    break;
-            }
-        }
-    }
-
-
     /**
      * Shows a Dialog for any bonded device.
      *
      * Additionally, when item is select, onDeviceSelected is invoked.
      * @param c
      */
-    private void showPairedNodesDialog(Context c) {
+    public static void showPairedNodesDialog(Context c) {
+        //Only Allow One Occurence of the Dialog to be Shown.
+        if(mDevicesDialog != null){ mDevicesDialog.dismiss(); }
+
         final Set<BluetoothDevice> mBondedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();
         final String[] bluetoothNames =  new String[mBondedDevices.size()];
         int i=0;
         for(BluetoothDevice device : mBondedDevices) { bluetoothNames[i++] = device.getName(); }
 
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(c);
-        builder.setTitle("Select a NODE")
+        //Build the Dialog
+        mDevicesDialog = new AlertDialog.Builder(c)
+                .setTitle("Select a NODE")
                 .setItems(bluetoothNames, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int position) {
@@ -126,9 +134,12 @@ public class MainOptionsFragment  extends Fragment {
                             }
                         }
                     }
-                });
-        builder.setNegativeButton("Cancel", null);
-        builder.create().show();
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        //Show the Dialog
+        mDevicesDialog.show();
 
 
     }

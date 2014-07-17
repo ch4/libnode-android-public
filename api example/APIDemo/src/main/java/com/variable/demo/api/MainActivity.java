@@ -5,8 +5,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -26,46 +24,33 @@ import com.variable.demo.api.fragment.ThermoCoupleFragment;
 import com.variable.framework.android.bluetooth.BluetoothService;
 import com.variable.framework.android.bluetooth.DefaultBluetoothDevice;
 import com.variable.framework.dispatcher.DefaultNotifier;
-import com.variable.framework.node.AndroidNodeDevice;
 import com.variable.framework.node.BaseSensor;
 import com.variable.framework.node.ChromaCalibrationAndBatchingTask;
-import com.variable.framework.node.ChromaDevice;
 import com.variable.framework.node.NodeDevice;
-import com.variable.framework.node.adapter.ConnectionAdapter;
 import com.variable.framework.node.enums.NodeEnums;
 import com.variable.framework.node.interfaces.ProgressUpdateListener;
 
-public class MainActivity extends FragmentActivity implements View.OnClickListener, NodeDevice.SensorDetector{
+import static com.variable.framework.node.NodeDevice.ConnectionListener;
+
+public class MainActivity extends FragmentActivity implements View.OnClickListener, NodeDevice.SensorDetector, ConnectionListener, ProgressUpdateListener{
     private static final String TAG = MainActivity.class.getName();
     private static BluetoothService mService;
-    private ConnectionAdapter mConnectionAdapter;
 
     private boolean isPulsing = false;
+    private ProgressDialog mProgressDialog;
+
+    //region Lifecycle Events
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        //Init B    luetooth Stuff
+        //Init Bluetooth Stuff
         if(ensureBluetoothIsOn()){
-            mService = new BluetoothService(mHandler);
+            mService = new BluetoothService();
             NodeApplication.setServiceAPI(mService);
         }
-
-        //Register for Communication Completed Events.
-        mConnectionAdapter = new ConnectionAdapter(){
-            @Override
-            public void onCommunicationInitCompleted(NodeDevice node) {
-                if(node.findSensor(NodeEnums.ModuleType.CHROMA) == null)
-                    mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE).sendToTarget();
-            }
-
-            @Override
-            public void nodeDeviceFailedToInit(NodeDevice device) {
-                onCommunicationInitFailed(device);
-            }
-        };
     }
 
     @Override
@@ -79,7 +64,7 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         animateToFragment(frag, MainOptionsFragment.TAG);
 
         //Issuing Initialization Commands
-        DefaultNotifier.instance().addConnectionListener(mConnectionAdapter);
+        DefaultNotifier.instance().addConnectionListener(this);
         DefaultNotifier.instance().addSensorDetectorListener(this);
     }
 
@@ -93,36 +78,68 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
 
         //Issuing Initialization Commands
-        DefaultNotifier.instance().removeConnectionListener(mConnectionAdapter);
+        DefaultNotifier.instance().removeConnectionListener(this);
         DefaultNotifier.instance().removeSensorDetectorListener(this);
     }
 
 
-    public void onConnected(final NodeDevice node)
-    {
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 200){ ensureBluetoothIsOn();  }
     }
 
+    //endregion
 
+    //region Bluetooth Conneection Callbacks
 
+    public void onConnected(final NodeDevice node)
+    {
+        //We have made a physical connection. The framework must get be able to get the current properties and state of the NODE.
+        updateProgressDialog("Preparing NODE", "Initializing " + node.getName());
+    }
 
     /**
      * Signifies that NODE is ready for communication.
      * @param node
      */
-    public void onCommunicationInitCompleted(NodeDevice node)
-    {
+    public void onCommunicationInitCompleted(NodeDevice node){
+        dismissProgressDialog();
         Toast.makeText(this, node.getName() + " is now ready for use.", Toast.LENGTH_SHORT).show();
     }
 
-    public void onDisconnect(NodeDevice node)
-    {
+    public void onDisconnect(NodeDevice node){
+        dismissProgressDialog();
         Toast.makeText(this, node.getName() + " disconnected.", Toast.LENGTH_SHORT).show();
     }
 
-    public void onCommunicationInitFailed(NodeDevice node)
-    {
-        Toast.makeText(this, node.getName() + " failed initialization.", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onConnectionFailed(NodeDevice nodeDevice, Exception e) {
+        //Alert User of Failed Attempt
+        Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
+
+        //Start the Dialog Selection Fragment.
+        MainOptionsFragment.showPairedNodesDialog(this);
     }
+
+    @Override
+    public void onNodeDiscovered(NodeDevice nodeDevice) {
+        //Ignore...Not Supported in Framework yet
+    }
+
+    @Override
+    public void nodeDeviceFailedToInit(NodeDevice nodeDevice) {
+        Toast.makeText(this, "Failed to Initialize NODE...Disconnecting Now", Toast.LENGTH_SHORT).show();
+
+        nodeDevice.disconnect();
+    }
+
+    @Override
+    public void onConnecting(NodeDevice nodeDevice) {
+        updateProgressDialog("Bluetooth Connection", "Connecting to " + nodeDevice.getName());
+    }
+
+    //endregion
 
     /**
      * Invokes a new intent to request to start the bluetooth, if not already on.
@@ -138,18 +155,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == 200){
-            if(resultCode == RESULT_OK){
-                mService = new BluetoothService(mHandler);
-                NodeApplication.setServiceAPI(mService);
-            }
-
-        }
-    }
 
     /**
      * Checks if a fragment with the specified tag exists already in the Fragment Manager. If present, then removes fragment.
@@ -256,130 +261,50 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
-    // The Handler that gets information back from the BluetoothService
-    private final Handler mHandler = new Handler() {
-        private ProgressDialog mProgressDialog;
-
-        @Override
-        public void handleMessage(Message msg) {
-            NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-
-            switch (msg.what) {
-                case MessageConstants.MESSAGE_INIT_NODE_PROGRESS:
-                    if(mProgressDialog == null)
-                        mProgressDialog = new ProgressDialog(MainActivity.this);
-
-                    buildDialog(node,mProgressDialog,msg.obj.toString());
-                    break;
-
-                case BluetoothService.MESSAGE_DEVICE_ADDRESS:
-                    //Retrieve the active
-                    String address = msg.getData().getString(BluetoothService.DEVICE_ADDRESS);
-                    node = AndroidNodeDevice.getManager().findFromAddress(address);
-                    ((NodeApplication) getApplication()).setActiveNode(node);
-                    break;
-
-                case BluetoothService.MESSAGE_STATE_CHANGE:
-                    String address2 = msg.getData().getString(BluetoothService.DEVICE_ADDRESS);
-                    if(address2 != null){
-                        node            = AndroidNodeDevice.getManager().findFromAddress(address2);
-                    }
-                    switch(msg.arg1){
-                        case BluetoothService.STATE_CONNECTING:
-
-                            if(mProgressDialog == null){
-                                mProgressDialog = new ProgressDialog(MainActivity.this);
-                            }else{
-                                closeDialog(mProgressDialog);
-                            }
-
-                            buildDialog(node, mProgressDialog, "Connecting...");
-
-                            break;
-
-                        case  BluetoothService.STATE_CONNECTED:
-                            if(mProgressDialog == null){
-                                mProgressDialog = new ProgressDialog(MainActivity.this);
-                            }else{
-                                closeDialog(mProgressDialog);
-                            }
-                            buildDialog(node, mProgressDialog, "Initializing...");
-                            onConnected(node);
-
-                            break;
-                        case BluetoothService.STATE_DISCONNECTED:
-                            closeDialog(mProgressDialog);
-                            onDisconnect(node);
-
-                            break;
-
-                    }
-
-                    break;
-
-                //Handle Node Successfull initialized.
-                case DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE:
-                    boolean isSuccessful = (Boolean) msg.obj;
-                    Log.d(TAG, "NodeDevice Init Completed in Handler");
-                    closeDialog(mProgressDialog);
-                    if(isSuccessful) {
-                        onCommunicationInitCompleted(node);
-                    }else{
-                        Toast.makeText(MainActivity.this, "Chroma Initialization Failed....Check your Internet Connection", Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-            }
+    //Convience Method
+    private final void dismissProgressDialog(){
+        if(mProgressDialog != null){
+            try { mProgressDialog.dismiss(); } catch(Exception e){ e.printStackTrace(); }
         }
+    }
 
-
-        private final void closeDialog(ProgressDialog progressDialog){
-            progressDialog.dismiss();
-        }
-
-        private final void buildDialog(final NodeDevice node, ProgressDialog progressDialog, String message){
-            progressDialog.setCancelable(false);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-
+    //Convience Method
+    private final void updateProgressDialog(String title, String message){
+        if(mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setCanceledOnTouchOutside(false);
+            mProgressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    node.disconnect();
+                    //Restart and Kill all connections....
+                    mService.stop();
+
+                    //Restart Service...
+                    mService.start();
                 }
             });
-
-            progressDialog.setTitle("Bluetooth Connection");
-            progressDialog.setMessage(message);
-
-            if(!progressDialog.isShowing() && !isFinishing()) { progressDialog.show(); }
         }
-    };
+
+        if(title != null) { mProgressDialog.setTitle(title);    }
+        if(message != null) {   mProgressDialog.setMessage(message);    }
+
+        if(mProgressDialog.isShowing() == false){
+            try { mProgressDialog.show(); } catch (Exception e){e.printStackTrace(); }
+        }
+    }
 
 
     @Override
     public void onSensorConnected(NodeDevice nodeDevice, final BaseSensor baseSensor) {
         Log.d(TAG, "Sensor Found: " + baseSensor.getModuleType() + " SubType: " + baseSensor.getSubtype() + " Serial: " + baseSensor.getSerialNumber());
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been detected", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been detected", Toast.LENGTH_SHORT).show();
 
 
         if(baseSensor.getModuleType().equals(NodeEnums.ModuleType.CHROMA))
         {
-            ChromaCalibrationAndBatchingTask task = new ChromaCalibrationAndBatchingTask(MainActivity.this, baseSensor, nodeDevice, new ProgressUpdateListener() {
-                @Override
-                public void onProgressUpdated(String updateText) {
-                    mHandler.obtainMessage(MessageConstants.MESSAGE_INIT_NODE_PROGRESS, updateText ).sendToTarget();
-                }
-
-                @Override
-                public void onTaskFinished(boolean result) {
-                    mHandler.obtainMessage(DefaultBluetoothDevice.NODE_DEVICE_INIT_COMPLETE, result).sendToTarget();
-                }
-            });
+            updateProgressDialog("Initializing Chroma", "Starting Initialization");
+            ChromaCalibrationAndBatchingTask task = new ChromaCalibrationAndBatchingTask(MainActivity.this, baseSensor, nodeDevice, this);
             new Thread(task).start();
             return;
         }
@@ -387,11 +312,23 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     @Override
     public void onSensorDisconnected(NodeDevice nodeDevice, final BaseSensor baseSensor) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been removed", Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(MainActivity.this, baseSensor.getModuleType() + " has been removed", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onProgressUpdated(String status) {
+        updateProgressDialog(null, status);
+    }
+
+    @Override
+    public void onTaskFinished(boolean isSuccessful) {
+        if(isSuccessful){
+            dismissProgressDialog();
+            Toast.makeText(this, "Chroma is ready to use", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            dismissProgressDialog();
+            Toast.makeText(this, "Chroma failed to find suitable internet connection", Toast.LENGTH_SHORT).show();
+        }
     }
 }
