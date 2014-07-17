@@ -93,20 +93,33 @@
     </TableLayout>
 
     <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight=".05"
-            android:gravity="center">
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight=".05"
+        android:weightSum="2"
+        android:layout_gravity="center"
+        >
 
         <Button
-                style="?android:attr/buttonStyleSmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Scan Color"
-                android:id="@+id/btnSingleScan"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:singleLine="false"/>
+            android:id="@+id/btnSingleScan"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:layout_weight="1"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="20dp"
+            android:text="Scan Color" />
+
+        <Button
+            android:id="@+id/btnCalibrate"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="40dp"
+            android:layout_weight="1"
+            android:text="Calibrate" />
 
     </LinearLayout>
 </LinearLayout>

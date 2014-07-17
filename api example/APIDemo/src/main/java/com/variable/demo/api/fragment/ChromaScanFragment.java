@@ -43,6 +43,18 @@ public class ChromaScanFragment extends ChromaFragment {
             }
         });
 
+        rootView.findViewById(R.id.btnCalibrate).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (chroma.getModel() < 1.1f)
+                {
+                    Toast.makeText(getActivity(), "Calibration not available for Chroma Older than 1.1", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                chroma.requestWhitePointCal();
+            }
+        });
+
         NodeDevice node  = ((NodeApplication)getActivity().getApplication()).getActiveNode();
         chroma = node.findSensor(NodeEnums.ModuleType.CHROMA);
 
@@ -85,5 +97,11 @@ public class ChromaScanFragment extends ChromaFragment {
     public void onHexValue(String hex){
         super.onHexValue(hex);
         ((TextView) getView().findViewById(R.id.txtHex)).setText(hex);
+    }
+
+    @Override
+    public void onCalibrationUpdate(boolean status) {
+        super.onCalibrationUpdate(status);
+        Toast.makeText(getActivity(), "Calibration " + (status ? "succeeded" : "failed"), Toast.LENGTH_LONG).show();
     }
 }
