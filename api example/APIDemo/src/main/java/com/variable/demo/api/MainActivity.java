@@ -156,12 +156,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
 
-    @Override
-    public void onBackPressed(){
-        //Perform noop if MainOptionsFragment is shown.
-        if(getSupportFragmentManager().findFragmentByTag(MainOptionsFragment.TAG) != null){    return;  }
-        else { super.onBackPressed();  }
-    }
     /**
      * Checks if a fragment with the specified tag exists already in the Fragment Manager. If present, then removes fragment.
      *
