@@ -45,12 +45,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        //Init Bluetooth Stuff
-        if(ensureBluetoothIsOn()){
-            mService = new BluetoothService();
-            NodeApplication.setServiceAPI(mService);
-        }
+        mService = new BluetoothService();
+        NodeApplication.setServiceAPI(mService);
     }
 
     @Override
@@ -141,6 +137,70 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
 
     //endregion
 
+    @Override
+    public void onClick(View view) {
+        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
+        if(!isNodeConnected(node))
+        {
+            Toast.makeText(this, "No Connection Available", Toast.LENGTH_SHORT ).show();
+            return;
+        }
+        switch(view.getId()){
+            case R.id.btnMotion:
+                animateToFragment(new MotionFragment(), MotionFragment.TAG);
+                break;
+
+            case R.id.btnClima:
+                if(checkForSensor(node, NodeEnums.ModuleType.CLIMA, true))
+                    animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
+                break;
+
+            case R.id.btnTherma:
+                if(checkForSensor(node, NodeEnums.ModuleType.THERMA, true))
+                    animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
+                break;
+
+            case R.id.btnOxa:
+                if(checkForSensor(node, NodeEnums.ModuleType.OXA, true))
+                    animateToFragment(new OxaFragment(), OxaFragment.TAG);
+                break;
+
+            case R.id.btnThermoCouple:
+                if(checkForSensor(node, NodeEnums.ModuleType.THERMOCOUPLE, true))
+                    animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
+                break;
+
+            case R.id.btnBarCode:
+                if(checkForSensor(node, NodeEnums.ModuleType.BARCODE, true))
+                    animateToFragment(new BarCodeFragment(), BarCodeFragment.TAG);
+                break;
+
+            case R.id.btnChroma:
+                if(checkForSensor(node, NodeEnums.ModuleType.CHROMA, true))
+                    animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
+                break;
+
+            //NODE must be polled to maintain an up to date array of sensors.
+            case R.id.btnRefreshSensors:
+                node.requestSensorUpdate();
+                break;
+
+            case R.id.btnPulseLed:
+                if(isPulsing){
+                    ((Button) view).setText("Pulse LEDs" );
+                    node.ledRestoreDefaultBehavior();
+                }else{
+                    ((Button) view).setText("Restore LEDs");
+                    node.ledsPulse((byte) 0xFF, (byte) 0x0F, (byte) 0xFF, (byte) 0xF0, (short) 2000, (short) 25);
+                }
+
+                isPulsing = !isPulsing;
+        }
+    }
+
+
+    //region Private Methods
+
     /**
      * Invokes a new intent to request to start the bluetooth, if not already on.
      */
@@ -200,66 +260,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
      */
     private boolean isNodeConnected(NodeDevice node) { return node != null && node.isConnected(); }
 
-    @Override
-    public void onClick(View view) {
-        NodeDevice node = ((NodeApplication) getApplication()).getActiveNode();
-        if(!isNodeConnected(node))
-        {
-            Toast.makeText(this, "No Connection Available", Toast.LENGTH_SHORT ).show();
-            return;
-        }
-        switch(view.getId()){
-            case R.id.btnMotion:
-                animateToFragment(new MotionFragment(), MotionFragment.TAG);
-                break;
-
-            case R.id.btnClima:
-               if(checkForSensor(node, NodeEnums.ModuleType.CLIMA, true))
-                    animateToFragment(new ClimaFragment(), ClimaFragment.TAG);
-               break;
-
-            case R.id.btnTherma:
-                if(checkForSensor(node, NodeEnums.ModuleType.THERMA, true))
-                    animateToFragment(new ThermaFragment(), ThermaFragment.TAG);
-                break;
-
-            case R.id.btnOxa:
-                if(checkForSensor(node, NodeEnums.ModuleType.OXA, true))
-                    animateToFragment(new OxaFragment(), OxaFragment.TAG);
-                break;
-
-            case R.id.btnThermoCouple:
-                if(checkForSensor(node, NodeEnums.ModuleType.THERMOCOUPLE, true))
-                    animateToFragment(new ThermoCoupleFragment(), ThermoCoupleFragment.TAG);
-                break;
-
-            case R.id.btnBarCode:
-                if(checkForSensor(node, NodeEnums.ModuleType.BARCODE, true))
-                    animateToFragment(new BarCodeFragment(), BarCodeFragment.TAG);
-                break;
-
-            case R.id.btnChroma:
-                if(checkForSensor(node, NodeEnums.ModuleType.CHROMA, true))
-                    animateToFragment(new ChromaScanFragment(), ChromaScanFragment.TAG);
-                break;
-
-            //NODE must be polled to maintain an up to date array of sensors.
-            case R.id.btnRefreshSensors:
-                node.requestSensorUpdate();
-                break;
-
-            case R.id.btnPulseLed:
-                if(isPulsing){
-                    ((Button) view).setText("Pulse LEDs" );
-                    node.ledRestoreDefaultBehavior();
-                }else{
-                    ((Button) view).setText("Restore LEDs");
-                    node.ledsPulse((byte) 0xFF, (byte) 0x0F, (byte) 0xFF, (byte) 0xF0, (short) 2000, (short) 25);
-                }
-
-                isPulsing = !isPulsing;
-        }
-    }
 
     //Convience Method
     private final void dismissProgressDialog(){
@@ -294,6 +294,8 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
         }
     }
 
+    //endregion
+
     //region Sensor Detector Callbacks
 
     @Override
@@ -317,7 +319,6 @@ public class MainActivity extends FragmentActivity implements View.OnClickListen
     }
 
     //endregion
-
 
     //region Chroma Initialization Callbacks
     @Override
