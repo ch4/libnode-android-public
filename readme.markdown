@@ -12,7 +12,7 @@ This jar can be consumed via gradle, maven, or just downloaded.
 
 NODE+ Application Requirements
 ---
-The library and bluetooth implementation has been tested on the following devices:
+The library and Bluetooth implementation has been tested on the following devices:
 	
 * Samsung S3 & S4  & S5
 * HTC One X (Developer Edition)
@@ -58,4 +58,3 @@ Other Documentation
 [JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
 
 [Framework Release Notes & Changes](https://bitbucket.org/variabletech/libnode-android-public/src/8136fca96066e1296f1aeb3bbe69fb44e21e9366/api%20example/?at=master)
-
