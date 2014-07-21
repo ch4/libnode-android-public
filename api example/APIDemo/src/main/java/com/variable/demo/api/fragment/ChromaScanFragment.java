@@ -1,3 +1,4 @@
+/* See http://variableinc.com/terms-use-license for the full license governing this code. */
 package com.variable.demo.api.fragment;
 
 import android.app.AlertDialog;

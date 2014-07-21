@@ -1,23 +1,20 @@
+Terms of Use
+===============
+Use of this API is subject to the [Variable Terms of Use](http://variableinc.com/terms-use-license/).
+
 About this Repo
 ===============
 This repo contains the [NODE](http://nodesensors.com) Android library, as well as an open source example application.
+This jar can be consumed via gradle, maven, or just downloaded. 
 
-Documentation
-=============
-Documentation can be found [here](http://variabletech.bitbucket.org/framework/android/doc)
 
-About the Demo Application
-===============
-The library demo application located in this repo uses a compiled JAR, which can be 
-downloaded separately from the 
-[downloads section](https://bitbucket.org/variabletech/libnode-android-public/downloads). 
-The demo application shows how to capture and display Motion, Clima, Oxa, Chroma and Therma data from a NODE device. 
+
 
 Compatible Devices
 ==================
 The library and bluetooth implementation has been tested on the following devices:
 	
-	* Samsung S3 & S4 
+	* Samsung S3 & S4  & S5
 	
 	* HTC One X (Developer Edition)
 	
@@ -33,23 +30,15 @@ However, the NODE Android library is compatible with Bluetooth-enabled Android d
 
 Build Requirements
 ===================
-* Android 4.3 API level 18 or above
+* Android 4.4.2 API level 19 or above
 * JRE / JDK 1.7
 
-License
-=============
-Copyright (c) 2012-2013, Variable Technologies LLC
-All rights reserved. 
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met: 
-
-Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. 
-
-Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
+* [Gettng Setup with Node.Android.Framework Artifact]
+-----------------------------------------------------
+* [JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
+-------------------------------------------------------------------
+* [Framework Release Notes & Changes](https://bitbucket.org/variabletech/libnode-android-public/src/8136fca96066e1296f1aeb3bbe69fb44e21e9366/api%20example/?at=master)
+--------------------------------------
 
 Troubleshooting
 ==================

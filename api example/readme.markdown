@@ -14,7 +14,7 @@ Framework Release Notes and Changes
 
 * ConnectionListener callback are now supported by the bluetooth service class.
 
-* More bluetooth enhancements
+* More bluetooth enhancements  
 
 * Added a ConnectionFail event to ConnectionListener and supported in BluetoothService.
 
