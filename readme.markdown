@@ -52,10 +52,13 @@ Most of the time, recompiling will get fix this error.
 
 Other Documentation
 ---  
+
 [Importing Project (Android Studio)](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Setup%20%28Android%20Studio%29)
+
+[JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
 
 [Project Configurations](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Configuration)
 
-[JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
+[Integration FAQ](https://bitbucket.org/variabletech/libnode-android-public/wiki/Integration%20FAQ)
 
 [Framework Release Notes & Changes](https://bitbucket.org/variabletech/libnode-android-public/src/8136fca96066e1296f1aeb3bbe69fb44e21e9366/api%20example/?at=master)
