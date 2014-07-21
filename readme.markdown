@@ -52,8 +52,9 @@ Most of the time, recompiling will get fix this error.
 
 Other Documentation
 ---  
+[Importing Project (Android Studio)](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Setup%20%28Android%20Studio%29)
 
-[Gettng Setup with Node.Android.Framework Artifact](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Configuration)
+[Project Configurations](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Configuration)
 
 [JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
 
