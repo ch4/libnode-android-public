@@ -55,6 +55,9 @@ Other Documentation
 
 [Importing Project (Android Studio)](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Setup%20%28Android%20Studio%29)
 
+A 3rd party blog post made by Victor Dibia can convert the project into eclipse format.
+[Importing Project (Eclipse)] (http://denvycom.com/blog/getting-started-developing-android-apps-with-the-node-sensor-using-eclipse/)
+
 [JavaDocs](http://variabletech.bitbucket.org/framework/android/doc)
 
 [Project Configurations](https://bitbucket.org/variabletech/libnode-android-public/wiki/Project%20Configuration)
